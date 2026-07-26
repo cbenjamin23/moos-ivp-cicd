@@ -16,7 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS_DIR = REPO_ROOT / "harnesses"
 CPP_TEST_DIR = REPO_ROOT / "tests" / "cpp"
 SCRIPTS_DIR = REPO_ROOT / "scripts"
-REPO_BLOB = "https://github.com/cbenjamin23/moos-ivp-cicd-testing/blob/main"
+REPO_BLOB = "https://github.com/cbenjamin23/moos-ivp-cicd/blob/main"
 UPSTREAM_REVISION = "29ea136b6d489fd8dda093b6218a51e4022badeb"
 UPSTREAM_BLOB = f"https://github.com/moos-ivp/moos-ivp/blob/{UPSTREAM_REVISION}"
 ASSET_VERSION = "20260719-1"
@@ -114,6 +114,30 @@ class Example:
     feature_commits: tuple[tuple[str, str], ...] = ()
     diff_label: str = ""
     source_revision: str = ""
+
+
+@dataclass(frozen=True)
+class RealExample:
+    slug: str
+    title: str
+    category: str
+    summary: str
+    pr_number: int
+    pr_author: str
+    pr_status: str
+    source_path: str
+    test_path: str
+    failing_revision: str
+    fixed_revision: str
+    problem: str
+    incomplete_solution: str
+    diff: str
+    diff_label: str
+    command: str
+    failure: str
+    what_caught_it: str
+    corrected_approach: str
+    corrected_result: str
 
 
 EXAMPLE_CATALOG: tuple[Example, ...] = (
@@ -249,22 +273,147 @@ Expected stale contacts: 0
     ),
 )
 
-EXAMPLE_ORDER = (
-    "dynamic-operating-region",
-    "stale-contact-timestamps",
-    "global-obstacle-alert-deduplication",
-    "coordinate-output-order",
+REAL_EXAMPLE_CATALOG: tuple[RealExample, ...] = (
+    RealExample(
+        slug="proj-geodesy-value-semantics",
+        title="Restoring PROJ broke safe geodesy copies",
+        category="Unit tests · merged PR #106",
+        summary="The restored PROJ backend converted coordinates correctly in the simple case, but copied geodesy objects crashed and successful conversions left their stored coordinates at zero.",
+        pr_number=106,
+        pr_author="HeroCC",
+        pr_status="Merged July 23, 2026",
+        source_path="MOOS_Jul2724/MOOSGeodesy/libMOOSGeodesy/MOOSGeodesyProj.cpp",
+        test_path="tests/cpp/moosgeodesy/Core/MOOSGeodesyTest.cpp",
+        failing_revision="00b2cf84",
+        fixed_revision="68523edd",
+        problem="PR #106 restored the PROJ implementation and made it selectable at build time. The first complete-looking version passed ordinary coordinate conversions, but it treated owned PROJ handles like ordinary copyable fields and returned projected values without updating MOOSGeodesy's stored state.",
+        incomplete_solution="The implementation owned raw PROJ handles, freed them in the destructor, and relied on compiler-generated copy operations. A copy therefore shared the same handles, while repeated conversions returned good output arguments but left the object's getters stale.",
+        diff="""-  projPJ pj_utm_;
+-  projPJ pj_latlong_;
++  typedef std::shared_ptr<void> ProjectionPtr;
++  ProjectionPtr m_utm_projection;
++  ProjectionPtr m_latlong_projection;
+
+-  MetersNorth = tmpNorth - GetOriginNorthing();
+-  MetersEast = tmpEast - GetOriginEasting();
++  SetMetersNorth(tmpNorth - GetOriginNorthing());
++  SetMetersEast(tmpEast - GetOriginEasting());
++  MetersNorth = GetMetersNorth();
++  MetersEast = GetMetersEast();""",
+        diff_label="Corrections prompted by the failing tests",
+        command="""cd tests/cpp
+./ctests.sh --moosgeodesy --jobs=4""",
+        failure="""18/22 enabled geodesy tests passed
+
+CopyConstructionPreservesProjection: SEGFAULT
+CopyAssignmentOutlivesSource: SEGFAULT
+ContainerCopiesRemainUsable: SEGFAULT
+
+RepeatedProjectionIsIndependentOfCallHistory
+  expected stored east/north ≈ -4.7174 / 6.7415
+  actual 0 / 0""",
+        what_caught_it="The geodesy family deliberately copies initialized objects, lets source objects die, stores copies in containers, and compares returned coordinates with the object's stored east/north state. Those checks exercised ownership and state consistency that one successful conversion could not reveal.",
+        corrected_approach="The PR replaced raw handles with shared ownership using the proper PROJ deleter, persisted successful conversion results through the normal setters, and added further transactional initialization and invalid-input safeguards.",
+        corrected_result="All 22 enabled geodesy tests passed, and the corrected implementation merged in PR #106.",
+    ),
+    RealExample(
+        slug="testfailure-burn-timing",
+        title="A two-second failure lasted four seconds",
+        category="Mission harness · open PR #109",
+        summary="The behavior accepted a two-second burn duration and appeared to honor it, but the helm remained blocked for roughly four seconds because the completion callback could trigger the burn twice.",
+        pr_number=109,
+        pr_author="cbenjamin23",
+        pr_status="Corrected upstream; PR remains open",
+        source_path="ivp/src/lib_behaviors-marine/BHV_TestFailure.cpp",
+        test_path="harnesses/testfailure_behavior_harnesses/H01-testfailure_behavior_unit/README.md",
+        failing_revision="2fa08bd7",
+        fixed_revision="7e6e6129",
+        problem="BHV_TestFailure intentionally stalls the helm to exercise failure handling. Its configurable burn time looked complete, but onCompleteState() could be invoked more than once and each invocation started a fresh busy wait.",
+        incomplete_solution="The initial implementation measured elapsed wall time inside onCompleteState() and returned after the requested duration. It had no one-shot guard, so a two-second configuration could burn twice and produce a four-second operational gap.",
+        diff="""void BHV_TestFailure::onCompleteState()
+{
++  if(m_failure_triggered)
++    return;
++  m_failure_triggered = true;
++
+   if(m_failure_crash)
+     assert(0);
+   else if(m_failure_burn) {
+-    MBTimer timer;
+-    timer.start();
+-    bool done = false;
+-    while(!done) {
+-      double elapsed_time = timer.get_float_wall_time();
+-      if(elapsed_time > m_failure_burn_time)
+-        done = true;
+-    }
+-    timer.stop();
++    const auto start_time = std::chrono::steady_clock::now();
++    while(std::chrono::duration<double>(
++      std::chrono::steady_clock::now() - start_time).count()
++      <= m_failure_burn_time) {}
+   }
+}""",
+        diff_label="One-shot guard and monotonic timer in the corrected PR",
+        command="""cd harnesses/testfailure_behavior_harnesses/H01-testfailure_behavior_unit
+./zlaunch.sh --case=burn_gap_detected_pass \\
+  --port_base=45500 --log=minimal 10""",
+        failure="""Configured burn: 2 seconds
+Observed normalized helm gap: approximately 4 seconds
+
+Expected gap band: 1.6–2.4 seconds
+Result: FAIL — burn lasted about twice as long as requested""",
+        what_caught_it="The strengthened mission harness measures the gap between helm iterations and checks duration-specific bands. That distinguishes a two-second burn from a three-second burn instead of merely proving that some delay occurred.",
+        corrected_approach="The proposed correction makes failure triggering one-shot and measures the burn with std::chrono::steady_clock. The duration cases then track their configured values across time warps 5, 10, and 20.",
+        corrected_result="All nine harness cases pass on corrected commit 7e6e6129. PR #109 is still open, so this result is corrected and reproducible but not yet merged.",
+    ),
+    RealExample(
+        slug="pmarineviewer-refresh-mode",
+        title="A valid viewer setting was silently ignored",
+        category="Unit test · merged PR #110",
+        summary="The viewer advertised refresh_mode and already knew how to apply it internally, but startup configuration never connected the setting to the existing GUI setter.",
+        pr_number=110,
+        pr_author="cbenjamin23",
+        pr_status="Merged July 25, 2026",
+        source_path="ivp/src/pMarineViewer/PMV_MOOSApp.cpp",
+        test_path="tests/test_pmarineviewer_refresh_mode_contract.py",
+        failing_revision="174bd734",
+        fixed_revision="4896b545",
+        problem="pMarineViewer's example configuration documented refresh_mode=events, and the GUI, repository, and request loops all supported the mode. The startup parser simply omitted the route from the configuration parameter to that existing implementation.",
+        incomplete_solution="Most of the feature was already present, so manual inspection at either end looked reassuring: the option was advertised and the runtime consumers were implemented. With no startup branch calling setRadioCastAttrib(), however, a valid configuration line was rejected and had no effect.",
+        diff="""bool PMV_MOOSApp::handleStartUp(...)
+ {
+   ...
++  else if(param == "refresh_mode")
++    handled = m_gui->setRadioCastAttrib(param, value);
+   ...
+ }""",
+        diff_label="Missing startup route added by the corrected commit",
+        command="""MOOS_IVP_SOURCE=/path/to/moos-ivp \
+  python3 -m unittest -v \
+  tests.test_pmarineviewer_refresh_mode_contract""",
+        failure="""test_advertised_refresh_mode_reaches_existing_gui_setter ... FAIL
+test_existing_gui_setter_updates_both_refresh_state_consumers ... ok
+test_request_loops_consume_the_states_updated_by_the_setter ... ok
+
+Ran 3 tests
+FAILED (failures=1)""",
+        what_caught_it="The restored source-contract test traces the entire advertised path: documentation to startup parsing, startup parsing to the GUI setter, the setter to both refresh-state consumers, and the request loops that read those states.",
+        corrected_approach="PR #110 added the missing startup branch and delegated validation to the existing GUI setter. That kept one source of truth for accepted values while finally connecting configuration to behavior.",
+        corrected_result="The same three checks pass at corrected commit 4896b545, which merged in PR #110.",
+    ),
 )
 
-_examples_by_slug = {example.slug: example for example in EXAMPLE_CATALOG}
-EXAMPLES: tuple[Example, ...] = tuple(
-    _examples_by_slug[slug] for slug in EXAMPLE_ORDER
-)
+EXAMPLES: tuple[RealExample, ...] = REAL_EXAMPLE_CATALOG
 
 STALE_EXAMPLE_SLUGS = (
     "strict-eflipper-filters",
     "colregs-boundary-tolerance",
     "json-node-reports",
+    "dynamic-operating-region",
+    "stale-contact-timestamps",
+    "global-obstacle-alert-deduplication",
+    "coordinate-output-order",
 )
 
 
@@ -2812,7 +2961,7 @@ def render_quick_start() -> str:
 git switch my-branch
 ./build.sh
 
-cd /path/to/moos-ivp-cicd-testing
+cd /path/to/moos-ivp-cicd
 ./build.sh</code></pre>
         </article>
       </div>
@@ -2852,7 +3001,7 @@ cd /path/to/moos-ivp-cicd-testing
       </div>
       <div class="explain-stack">
         <article>
-          <pre><code>cd /path/to/moos-ivp-cicd-testing
+          <pre><code>cd /path/to/moos-ivp-cicd
 ./build-matrix.sh</code></pre>
           <p><strong>Example success output</strong></p>
           <pre><code>Build matrix result: 5 passed, 0 failed</code></pre>
@@ -3057,24 +3206,16 @@ def render_feature_commit_links(example: Example) -> str:
     return " · ".join(links)
 
 
-def render_example_verification(example: Example) -> str:
-    if example.feature_commits:
-        return f"""
-      <div class="example-verification">
-        <strong>Focused failure</strong>
-        <span>Feature grounded in {render_feature_commit_links(example)}</span>
-        <span>Reconstructed incomplete edit; not a historical CI claim</span>
-      </div>"""
-
+def render_example_verification(example: RealExample) -> str:
     return f"""
       <div class="example-verification">
-        <strong>Focused failure</strong>
-        <span>Baseline <a href="https://github.com/moos-ivp/moos-ivp/commit/{UPSTREAM_REVISION}"><code>{UPSTREAM_REVISION[:10]}</code></a></span>
-        <span>Local mutation; no commit created</span>
+        <strong>Real upstream PR</strong>
+        <span><a href="https://github.com/moos-ivp/moos-ivp/pull/{example.pr_number}">PR #{example.pr_number}</a> by {escape(example.pr_author)}</span>
+        <span>{escape(example.pr_status)} · failing <a href="https://github.com/moos-ivp/moos-ivp/commit/{example.failing_revision}"><code>{example.failing_revision}</code></a> · corrected <a href="https://github.com/moos-ivp/moos-ivp/commit/{example.fixed_revision}"><code>{example.fixed_revision}</code></a></span>
       </div>"""
 
 
-def render_example_card(example: Example, number: int) -> str:
+def render_example_card(example: RealExample, number: int) -> str:
     return f"""
       <article class="example-card">
         <div class="example-card-topline">
@@ -3085,12 +3226,12 @@ def render_example_card(example: Example, number: int) -> str:
         <p>{escape(example.summary)}</p>
         <dl class="example-card-facts">
           <div>
-            <dt>Seemingly benign edit</dt>
-            <dd>{escape(example.mutation)}</dd>
+            <dt>Incomplete solution</dt>
+            <dd>{escape(example.incomplete_solution)}</dd>
           </div>
           <div>
             <dt>Result</dt>
-            <dd><span class="result-fail">Focused failure</span></dd>
+            <dd><span class="result-fail">Test caught it</span></dd>
           </div>
         </dl>
         <a class="text-link" href="examples/{example.slug}.html">Read the full example</a>
@@ -3107,19 +3248,19 @@ def render_examples() -> str:
   <main>
     <section class="page-hero page-hero--wide-lede">
       <a class="back-link" href="index.html">Back to overview</a>
-      <h1>Example Regression Detection</h1>
-      <p class="lede">Each example starts with a small, defensible edit to MOOS-IvP, then shows the focused test that catches it and the behavior that test protects.</p>
+      <h1>Real Regression Detection</h1>
+      <p class="lede">Each story follows a real MOOS-IvP change from an incomplete solution through a focused failure to the corrected upstream result.</p>
       <div class="example-verification">
-        <strong>Evidence, not anecdotes</strong>
-        <span>Debugging mutations verified at <a href="https://github.com/moos-ivp/moos-ivp/commit/{UPSTREAM_REVISION}"><code>{UPSTREAM_REVISION[:10]}</code></a></span>
-        <span>Feature examples are grounded in real upstream implementations</span>
+        <strong>No reconstructed edits</strong>
+        <span>Three upstream PRs</span>
+        <span>Real revisions, commands, failures, and corrections</span>
       </div>
     </section>
 
     <section class="content-section">
       <div class="section-heading">
-        <h2>Four Failure Stories</h2>
-        <p>The two new-feature stories come first, followed by the two debugging stories. Within each pair, the harness example shows the operational outcome before the unit test example shows the smaller contract underneath.</p>
+        <h2>Three Real Failure Stories</h2>
+        <p>The PROJ restoration comes first because it shows this repository improving another contributor's PR. The two contributor-authored fixes follow, including one mission-harness failure and one source-level configuration failure.</p>
       </div>
       <div class="example-grid">
         {cards}
@@ -3128,12 +3269,12 @@ def render_examples() -> str:
 
     <section class="workflow example-method">
       <p class="eyebrow">Method</p>
-      <h2>One seemingly benign edit at a time</h2>
+      <h2>Problem, failure, correction</h2>
       <ol>
-        <li>Start from a passing focused test or harness case.</li>
-        <li>Make one plausible change without committing it to MOOS-IvP.</li>
-        <li>Capture the meaningful failure, not merely a compiler error.</li>
-        <li>Explain what the test protects and the safer approach.</li>
+        <li>Start with the real problem an upstream PR tried to solve.</li>
+        <li>Show the plausible but incomplete implementation.</li>
+        <li>Capture the focused test or harness failure that exposed the gap.</li>
+        <li>Trace the corrected implementation and its upstream status.</li>
       </ol>
     </section>
   </main>
@@ -3141,38 +3282,14 @@ def render_examples() -> str:
     return page_shell("Examples", body)
 
 
-def render_example(example: Example) -> str:
+def render_example(example: RealExample) -> str:
     example_index = EXAMPLES.index(example)
     next_example = EXAMPLES[(example_index + 1) % len(EXAMPLES)]
-    source_revision = example.source_revision
-    if not source_revision:
-        source_revision = (
-            example.feature_commits[-1][0]
-            if example.feature_commits
-            else UPSTREAM_REVISION
-        )
-    source_link_label = "Open the source at the tested baseline"
-    if example.feature_commits and not example.source_revision:
-        source_link_label = "Open the source at the completed feature revision"
-    test_result = f"""
-        <article class="example-baseline">
-          <h3>Before the edit</h3>
-          <pre><code>{escape(example.baseline)}</code></pre>
-        </article>
-      </div>
-      <article class="example-failure">
-        <div>
-          <p class="eyebrow">After the edit</p>
-          <h3>The focused test turns red</h3>
-        </div>
-        <pre><code>{escape(example.failure)}</code></pre>
-      </article>"""
-    diff_label = example.diff_label or example.source_path
     body = f"""
   <main>
     <section class="page-hero page-hero--wide-lede">
       <a class="back-link" href="../examples.html">Back to examples</a>
-      <p class="eyebrow">Example {example_index + 1:02d} · {escape(example.category)}</p>
+      <p class="eyebrow">Real example {example_index + 1:02d} · {escape(example.category)}</p>
       <h1>{escape(example.title)}</h1>
       <p class="lede">{escape(example.summary)}</p>
       {render_example_verification(example)}
@@ -3180,17 +3297,19 @@ def render_example(example: Example) -> str:
 
     <section class="content-section example-section">
       <div class="section-heading">
-        <p class="eyebrow">The proposed edit</p>
-        <h2>{escape(example.mutation)}</h2>
+        <p class="eyebrow">The upstream problem</p>
+        <h2>A plausible solution was incomplete</h2>
       </div>
       <div class="example-story-grid">
         <article class="example-explanation">
-          <h3>Why it looks reasonable</h3>
-          <p>{escape(example.why_it_looks_good)}</p>
-          <p><a class="text-link" href="{upstream_url(example.source_path, source_revision)}">{source_link_label}</a></p>
+          <h3>The problem</h3>
+          <p>{escape(example.problem)}</p>
+          <h3>The incomplete solution</h3>
+          <p>{escape(example.incomplete_solution)}</p>
+          <p><a class="text-link" href="{upstream_url(example.source_path, example.failing_revision)}">Open the source at the failing revision</a></p>
         </article>
         <article class="example-code-panel">
-          <p class="code-label">{escape(diff_label)}</p>
+          <p class="code-label">{escape(example.diff_label)}</p>
           <pre class="mutation-diff"><code>{escape(example.diff)}</code></pre>
         </article>
       </div>
@@ -3206,27 +3325,36 @@ def render_example(example: Example) -> str:
           <h3>Command</h3>
           <pre><code>{escape(example.command)}</code></pre>
         </article>
-        {test_result}
+        <article class="example-failure">
+          <div>
+            <p class="eyebrow">At the incomplete revision</p>
+            <h3>The focused check fails</h3>
+          </div>
+          <pre><code>{escape(example.failure)}</code></pre>
+        </article>
+      </div>
     </section>
 
     <section class="content-section">
       <div class="section-heading">
-        <p class="eyebrow">Explanation</p>
-        <h2>What the failure tells us</h2>
+        <p class="eyebrow">The correction</p>
+        <h2>What changed before the final upstream result</h2>
       </div>
       <div class="example-lessons">
         <article>
-          <h3>What changed</h3>
-          <p>{escape(example.what_changed)}</p>
-        </article>
-        <article>
-          <h3>What caught it</h3>
+          <h3>What the test proved</h3>
           <p>{escape(example.what_caught_it)}</p>
           <p><a class="text-link" href="{repo_url(example.test_path)}">Open the protecting test</a></p>
         </article>
         <article>
-          <h3>Safer approach</h3>
+          <h3>Corrected solution</h3>
           <p>{escape(example.corrected_approach)}</p>
+          <p><a class="text-link" href="{upstream_url(example.source_path, example.fixed_revision)}">Open the corrected source</a></p>
+        </article>
+        <article>
+          <h3>Upstream result</h3>
+          <p>{escape(example.corrected_result)}</p>
+          <p><a class="text-link" href="https://github.com/moos-ivp/moos-ivp/pull/{example.pr_number}">Open PR #{example.pr_number}</a></p>
         </article>
       </div>
     </section>
