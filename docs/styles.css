@@ -575,9 +575,8 @@ h3 {
 
 .example-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
-  border-top: 1px solid var(--line);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
 }
 
 .example-card,
@@ -595,12 +594,7 @@ h3 {
 .example-card {
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 0;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  box-shadow: none;
+  padding: 1.2rem;
 }
 
 .example-card h2 {
@@ -645,7 +639,6 @@ h3 {
 
 .example-card-facts {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.65rem;
   margin: 1rem 0;
 }
@@ -1285,10 +1278,6 @@ tbody tr:last-child td {
   .gif-grid,
   .family-harnesses,
   .case-matrix {
-    grid-template-columns: 1fr;
-  }
-
-  .example-card-facts {
     grid-template-columns: 1fr;
   }
 
