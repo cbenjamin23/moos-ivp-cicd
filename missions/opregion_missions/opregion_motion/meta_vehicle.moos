@@ -100,6 +100,7 @@ ProcessConfig = uFldNodeBroker
   bridge = src=OPREG_SECS_IN_HALT
   bridge = src=OPREG_SECS_OUT_HALT
   bridge = src=OPREG_SECS_OUT_SAVE
+  bridge = src=OPREG_EXEC_TICK
   bridge = src=IVPHELM_UPDATE_RESULT
   bridge = src=NAV_DEPTH
   bridge = src=NAV_ALTITUDE

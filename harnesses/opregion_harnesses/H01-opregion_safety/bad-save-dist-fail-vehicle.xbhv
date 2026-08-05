@@ -4,6 +4,7 @@ Behavior = BHV_OpRegionV24
   pwt       = 300
   condition = MODE == ACTIVE
   updates   = OPREGION_UPDATES
+  runxflag  = OPREG_EXEC_TICK=$[SECS_IN_HALT_POLY]
 
   core_poly = pts={-23,-152:47,-152:47,-90:-23,-90}
   save_dist = -1

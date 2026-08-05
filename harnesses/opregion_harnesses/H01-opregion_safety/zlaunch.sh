@@ -86,6 +86,8 @@ CASES=(
     dynamic_region_expand_pass
     dynamic_region_update_pass
     dynamic_region_halt_fail
+    explicit_polygons_pass
+    explicit_halt_poly_fail
 )
 
 declare -a SELECTED_CASES CASE_RESULT
@@ -419,6 +421,14 @@ get_case_config() {
         dynamic_region_halt_fail)
             CASE_SHORE_PATCH="$HARNESS_DIR/dynamic-region-halt-fail-shoreside.xmoos"
             CASE_VEH_MOOS_PATCH="$HARNESS_DIR/dynamic-region-halt-fail-vehicle.xmoos"
+            ;;
+        explicit_polygons_pass)
+            CASE_SHORE_PATCH="$HARNESS_DIR/explicit-polygons-pass-shoreside.xmoos"
+            CASE_VEH_BHV_PATCH="$HARNESS_DIR/explicit-polygons-pass-vehicle.xbhv"
+            ;;
+        explicit_halt_poly_fail)
+            CASE_SHORE_PATCH="$HARNESS_DIR/explicit-halt-poly-fail-shoreside.xmoos"
+            CASE_VEH_BHV_PATCH="$HARNESS_DIR/explicit-halt-poly-fail-vehicle.xbhv"
             ;;
         *)
             echo "$ME: unknown case: $CASE_NAME" >&2

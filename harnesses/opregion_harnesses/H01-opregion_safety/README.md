@@ -27,6 +27,7 @@ signals:
   `MALCONFIG`
 - whether runtime `OPREGION_CORE_POLY` shrink and expansion updates are accepted
   and enforced
+- whether explicit `save_poly` and `halt_poly` configuration is honored
 
 ## Current Matrix
 
@@ -55,6 +56,8 @@ signals:
 - `dynamic_region_expand_pass` Starts with a dynamic core ending at `x=21`, then posts an expanded core ending at `x=60` after three seconds, testing expansion before the vehicle reaches the narrow save boundary; passes on arrival with all breach flags false and no behavior error.
 - `dynamic_region_update_pass` Starts with a core ending at `x=47`, posts a shrink to `x=21` after six seconds, and routes through `x=34` before returning to `x=4`, testing runtime enforcement of the recomputed save boundary; passes on arrival with both `SAVE_REGION_BREACHED=true` and `SAVE_REGION_RECOVERING=true`, plus no halt/time breach or behavior error.
 - `dynamic_region_halt_fail` Posts a shrink from east edge `x=47` to `x=5` after six seconds while retaining the stock eight-meter halt distance, testing immediate enforcement of a recomputed halt boundary; the harness passes when `HALT_REGION_BREACHED=true` and a behavior error appear without a time breach.
+- `explicit_polygons_pass` Uses explicit `save_poly` and `halt_poly` values instead of generated distance buffers, routes outside the explicit save polygon while remaining inside the explicit halt polygon, and requires save recovery without a halt breach.
+- `explicit_halt_poly_fail` Uses an explicit halt polygon ending at `x=25`, routes through `x=34`, and requires the explicit halt boundary to produce the expected halt breach.
 
 ## Running
 

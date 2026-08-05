@@ -47,6 +47,8 @@ ProcessConfig = pEchoVar
   AppTick   = 10
   CommsTick = 10
 
+  Echo = OPREG_EXEC_TICK -> OPREG_EXEC_SEEN
+
   FLIP:reset_success = source_variable = IVPHELM_UPDATE_RESULT
   FLIP:reset_success = dest_variable   = OPREG_RESET_SUCCESS
   FLIP:reset_success = bhv == opreg
@@ -78,6 +80,7 @@ ProcessConfig = pAutoPoke
   flag = OPREG_SECS_IN_HALT=0
   flag = OPREG_SECS_OUT_HALT=0
   flag = OPREG_SECS_OUT_SAVE=0
+  flag = OPREG_EXEC_SEEN=-1
   flag = OPREG_RESET_ACCEPTED=false
   flag = OPREG_DEPTH_INPUT=-1
   flag = OPREG_ALTITUDE_INPUT=-1
@@ -113,6 +116,7 @@ ProcessConfig = pMissionEval
 
   lead_condition = ARRIVED = true
   pass_condition = ARRIVED = true
+  pass_condition = OPREG_EXEC_SEEN >= 0
   pass_condition = SAVE_REGION_BREACHED = false
   pass_condition = HALT_REGION_BREACHED = false
   pass_condition = TIME_LIMIT_BREACHED = false
@@ -136,6 +140,7 @@ ProcessConfig = pMissionEval
   report_column = halt_breached=$[HALT_REGION_BREACHED]
   report_column = time_breached=$[TIME_LIMIT_BREACHED]
   report_column = bhv_error=$[BHV_ERROR_SEEN]
+  report_column = opreg_exec_tick=$[OPREG_EXEC_SEEN]
   report_column = mhash=$[MHASH_SHORT]
 }
 
@@ -154,6 +159,7 @@ ProcessConfig = uFldShoreBroker
   qbridge  = HALT_REGION_BREACHED, TIME_LIMIT_BREACHED
   qbridge  = DEPTH_LIMIT_BREACHED, ALTITUDE_LIMIT_BREACHED
   qbridge  = OPREG_SECS_IN_HALT, OPREG_SECS_OUT_HALT, OPREG_SECS_OUT_SAVE
+  qbridge  = OPREG_EXEC_TICK
   qbridge  = IVPHELM_UPDATE_RESULT, NAV_DEPTH, NAV_ALTITUDE
   qbridge  = OPREG_DEPTH_INPUT, OPREG_ALTITUDE_INPUT
 }

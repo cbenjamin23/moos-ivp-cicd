@@ -1,0 +1,47 @@
+ProcessConfig = pMissionEval
+{
+  AppTick   = 4
+  CommsTick = 4
+
+  mailflag = @BHV_ERROR#BHV_ERROR_SEEN=true
+
+  lead_condition = ARRIVED = true
+  pass_condition = ARRIVED = true
+  pass_condition = OPREG_EXEC_SEEN >= 0
+  pass_condition = SAVE_REGION_BREACHED = true
+  pass_condition = SAVE_REGION_RECOVERING = true
+  pass_condition = HALT_REGION_BREACHED = false
+  pass_condition = TIME_LIMIT_BREACHED = false
+  pass_condition = BHV_ERROR_SEEN = false
+
+  result_flag = MISSION_EVALUATED = true
+  pass_flag   = SAY_MOOS = pass
+  fail_flag   = SAY_MOOS = fail
+
+  mission_form = opregion_safety_tests
+  mission_mod  = $(MMOD:=explicit_polygons_pass)
+  report_file  = results.txt
+  report_column = grade=$[GRADE]
+  report_column = form=$[MISSION_FORM]
+  report_column = mmod=$[MMOD]
+  report_column = eval=$[ARRIVED]
+  report_column = expected=explicit_save_and_halt_polygons
+  report_column = opreg_exec_tick=$[OPREG_EXEC_SEEN]
+  report_column = save_breached=$[SAVE_REGION_BREACHED]
+  report_column = save_recovering=$[SAVE_REGION_RECOVERING]
+  report_column = halt_breached=$[HALT_REGION_BREACHED]
+  report_column = time_breached=$[TIME_LIMIT_BREACHED]
+  report_column = bhv_error=$[BHV_ERROR_SEEN]
+  report_column = mhash=$[MHASH_SHORT]
+}
+
+ProcessConfig = uTimerScript
+{
+  AppTick   = 2
+  CommsTick = 2
+  condition = DEPLOY_ALL = true
+
+  event = var=VIEW_POLYGON, val="pts={-23,-135:47,-135:47,-107:-23,-107},label=opreg_core_fixed,edge_color=white,vertex_size=0,edge_size=2,duration=9999", time=1
+  event = var=VIEW_POLYGON, val="pts={-23,-135:27,-135:27,-107:-23,-107},label=opreg_save_explicit,edge_color=yellow,vertex_size=0,edge_size=2,duration=9999", time=1
+  event = var=VIEW_POLYGON, val="pts={-49,-161:49,-161:49,-81:-49,-81},label=opreg_halt_explicit,edge_color=white,vertex_size=0,edge_size=1,duration=9999", time=1
+}

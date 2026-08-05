@@ -1,0 +1,34 @@
+ProcessConfig = pMissionEval
+{
+  AppTick   = 4
+  CommsTick = 4
+
+  mailflag = @BHV_ERROR#BHV_ERROR_SEEN=true
+
+  lead_condition = HALT_REGION_BREACHED = true
+  lead_condition = BHV_ERROR_SEEN = true
+  pass_condition = OPREG_EXEC_SEEN >= 0
+  pass_condition = SAVE_REGION_BREACHED = false
+  pass_condition = HALT_REGION_BREACHED = true
+  pass_condition = TIME_LIMIT_BREACHED = false
+  pass_condition = BHV_ERROR_SEEN = true
+
+  result_flag = MISSION_EVALUATED = true
+  pass_flag   = SAY_MOOS = pass
+  fail_flag   = SAY_MOOS = fail
+
+  mission_form = opregion_safety_tests
+  mission_mod  = $(MMOD:=explicit_halt_poly_fail)
+  report_file  = results.txt
+  report_column = grade=$[GRADE]
+  report_column = form=$[MISSION_FORM]
+  report_column = mmod=$[MMOD]
+  report_column = eval=$[HALT_REGION_BREACHED]
+  report_column = expected=explicit_halt_polygon_breach
+  report_column = opreg_exec_tick=$[OPREG_EXEC_SEEN]
+  report_column = save_breached=$[SAVE_REGION_BREACHED]
+  report_column = halt_breached=$[HALT_REGION_BREACHED]
+  report_column = time_breached=$[TIME_LIMIT_BREACHED]
+  report_column = bhv_error=$[BHV_ERROR_SEEN]
+  report_column = mhash=$[MHASH_SHORT]
+}
