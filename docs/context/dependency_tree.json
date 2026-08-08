@@ -1556,10 +1556,11 @@
         "uTimerScript"
       ],
       "zlaunch": {
-        "case_count": 32,
+        "case_count": 33,
         "case_parse_error": "",
         "cases": [
           "cli_numeric_pass",
+          "direct_host_port_pass",
           "cli_string_pass",
           "cli_boolean_pass",
           "cli_negative_numeric_pass",
@@ -4422,7 +4423,7 @@
         "path": "missions/opregion_missions/opregion_motion"
       },
       "patches": {
-        "file_count": 47
+        "file_count": 51
       },
       "path": "harnesses/opregion_harnesses/H01-opregion_safety",
       "perf_profile": "",
@@ -4447,7 +4448,7 @@
         "uTimerScript"
       ],
       "zlaunch": {
-        "case_count": 25,
+        "case_count": 27,
         "case_parse_error": "",
         "cases": [
           "inside_region_pass",
@@ -4474,7 +4475,9 @@
           "bad_trigger_exit_time_fail",
           "dynamic_region_expand_pass",
           "dynamic_region_update_pass",
-          "dynamic_region_halt_fail"
+          "dynamic_region_halt_fail",
+          "explicit_polygons_pass",
+          "explicit_halt_poly_fail"
         ],
         "helpers": [
           "scripts/moos_scoped_teardown.sh"
@@ -6968,16 +6971,15 @@
       ".mjo": 1,
       ".moos": 152,
       ".mp4": 149,
-      ".out": 3,
       ".png": 4,
       ".py": 39,
       ".sh": 360,
       ".txt": 302,
-      ".xbhv": 449,
-      ".xmoos": 1347,
+      ".xbhv": 451,
+      ".xmoos": 1349,
       "[none]": 6
     },
-    "harness_patch_count": 1691,
+    "harness_patch_count": 1695,
     "harness_target_count": 67,
     "harness_zlaunch_count": 67,
     "mission_config_count": 468,

@@ -25,8 +25,9 @@ mission result, command status, and `.checkvars` output are the grading inputs.
 Use `--log=full` for the complete matrix, or combine it with `--case=<name>`
 for one fully logged case.
 
-After the high-confidence coverage review, the current 32-case matrix passed
-32/32 with four jobs in 53 seconds. Mutation checks rejected an early timeout,
+During the high-confidence coverage review, the prior 32-case matrix passed
+32/32 with four jobs in 53 seconds. This matrix adds direct host/port operation
+as its 33rd case. Mutation checks rejected an early timeout,
 an already-present "late" variable, an extra `.checkvars` row, and removal of
 `--unique`; paired true/false cases also verify both separate and compound AND
 conditions.
@@ -34,6 +35,7 @@ conditions.
 ## Cases
 
 - `cli_numeric_pass`: Queries `QUERY_NUM = 42` from the command line, testing numeric equality against the published value; passes when `uQueryDB` exits `0` within the three-second wait.
+- `direct_host_port_pass`: Queries `QUERY_NUM = 42` using direct `--host=localhost --port=N` arguments, proving the supplied CLI port reaches the isolated MOOSDB without a mission file; passes when `uQueryDB` connects and exits `0` before the harness deadline.
 - `cli_string_pass`: Queries `QUERY_STR = ready`, testing string equality against the published value; passes when `uQueryDB` exits `0` within three seconds.
 - `cli_boolean_pass`: Queries `QUERY_BOOL = true`, testing equality for the published boolean-looking string; passes when `uQueryDB` exits `0` within three seconds.
 - `cli_negative_numeric_pass`: Queries `QUERY_NEG = -7.5`, testing parsing and equality for a negative decimal; passes when `uQueryDB` exits `0` within three seconds.

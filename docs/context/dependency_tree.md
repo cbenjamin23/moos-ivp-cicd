@@ -10,7 +10,7 @@ repo files should be opened next?
 
 - Harness targets: `67`
 - Harness launchers: `67` under `harnesses/**/zlaunch.sh`
-- Harness patch/config files: `1691` under configured targets
+- Harness patch/config files: `1695` under configured targets
 - Mission launch/config files: `468` under `missions/`
 - C++ test sources: `215`
 
@@ -92,7 +92,7 @@ jq '.cpp_tests.families.mbutil' docs/context/dependency_tree.json
 | `pnodereporter_h01` | `pnodereporter` | `harnesses/pnodereporter_harnesses/H01-pnodereporter_unit/zlaunch.sh` | `missions/pnodereporter_missions/pnodereporter_unit` | 33 | - | `pnodereporter-unit` |
 | `upokedb_h01` | `upokedb` | `harnesses/upokedb_harnesses/H01-upokedb_unit/zlaunch.sh` | `missions/upokedb_missions/upokedb_unit` | 23 | - | `upokedb-unit` |
 | `uxms_h01` | `uxms` | `harnesses/uxms_harnesses/H01-uxms_unit/zlaunch.sh` | `missions/uxms_missions/uxms_unit` | 31 | `uXMS` | `uxms-unit` |
-| `uquerydb_h01` | `uquerydb` | `harnesses/uquerydb_harnesses/H01-uquerydb_unit/zlaunch.sh` | `missions/uquerydb_missions/uquerydb_unit` | 32 | `uQueryDB` | `uquerydb-unit` |
+| `uquerydb_h01` | `uquerydb` | `harnesses/uquerydb_harnesses/H01-uquerydb_unit/zlaunch.sh` | `missions/uquerydb_missions/uquerydb_unit` | 33 | `uQueryDB` | `uquerydb-unit` |
 | `pechovar_h01` | `pechovar` | `harnesses/pechovar_harnesses/H01-pechovar_unit/zlaunch.sh` | `missions/pechovar_missions/pechovar_unit` | 34 | `pEchoVar` | `pechovar-unit` |
 | `utimerscript_h01` | `utimerscript` | `harnesses/utimerscript_harnesses/H01-utimerscript_unit/zlaunch.sh` | `missions/utimerscript_missions/utimerscript_unit` | 30 | - | `utimerscript-unit` |
 | `pdeadmanpost_h01` | `pdeadmanpost` | `harnesses/pdeadmanpost_harnesses/H01-pdeadmanpost_unit/zlaunch.sh` | `missions/pdeadmanpost_missions/pdeadmanpost_unit` | 20 | `pDeadManPost` | `pdeadmanpost-unit` |
@@ -130,7 +130,7 @@ jq '.cpp_tests.families.mbutil' docs/context/dependency_tree.json
 | `umayfinish_h01` | `umayfinish` | `harnesses/mission_utility_harnesses/H03-umayfinish_unit/zlaunch.sh` | `missions/mission_utility_missions/mission_utility_unit` | 4 | - | `umayfinish-unit` |
 | `loiter_h01` | `loiter_behavior` | `harnesses/loiter_behavior_harnesses/H01-loiter_behavior_motion/zlaunch.sh` | `missions/loiter_behavior_missions/loiter_behavior_motion` | 29 | `pEchoVar` | `loiter-behavior-motion` |
 | `obstacle_behavior_h01` | `obstacle_behavior` | `harnesses/obstacle_behavior_harnesses/H01-obstacle_behavior_motion/zlaunch.sh` | `missions/obstacle_behavior_missions/obstacle_behavior_motion` | 21 | `pObstacleMgr`, `uFldCollObDetect` | `obstacle-behavior-motion` |
-| `opregion_h01` | `opregion` | `harnesses/opregion_harnesses/H01-opregion_safety/zlaunch.sh` | `missions/opregion_missions/opregion_motion` | 25 | `pEchoVar` | `opregion-safety` |
+| `opregion_h01` | `opregion` | `harnesses/opregion_harnesses/H01-opregion_safety/zlaunch.sh` | `missions/opregion_missions/opregion_motion` | 27 | `pEchoVar` | `opregion-safety` |
 | `p01_obstacle` | `performance` | `harnesses/performance_harnesses/P01-obstacle_gauntlet/zlaunch.sh` | `missions/performance_missions/P01-obstacle_gauntlet` | 3 | `uFldObstacleSim`, `pObstacleMgr`, `uFldCollObDetect` | `performance-obstacle-gauntlet` |
 | `shadow_h01` | `shadow_behavior` | `harnesses/shadow_behavior_harnesses/H01-shadow_behavior_motion/zlaunch.sh` | `missions/shadow_behavior_missions/shadow_behavior_motion` | 28 | `pEchoVar`, `pContactMgrV20` | `shadow-behavior-motion` |
 | `stationkeep_h01` | `stationkeep_behavior` | `harnesses/stationkeep_behavior_harnesses/H01-stationkeep_behavior_motion/zlaunch.sh` | `missions/stationkeep_behavior_missions/stationkeep_behavior_motion` | 33 | `pEchoVar` | `stationkeep-behavior-motion` |

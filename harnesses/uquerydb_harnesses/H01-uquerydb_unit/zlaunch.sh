@@ -62,6 +62,7 @@ FINISH_FATAL_REASON=""
 
 CASES=(
     cli_numeric_pass
+    direct_host_port_pass
     cli_string_pass
     cli_boolean_pass
     cli_negative_numeric_pass
@@ -334,6 +335,10 @@ get_case_config() {
         cli_numeric_pass)
             QUERY_ARGS=("--condition=QUERY_NUM = 42" "--wait=3")
             ;;
+        direct_host_port_pass)
+            QUERY_FILE_MODE="direct"
+            QUERY_ARGS=("--condition=QUERY_NUM = 42" "--wait=3")
+            ;;
         cli_string_pass)
             QUERY_ARGS=("--condition=QUERY_STR = ready" "--wait=3")
             ;;
@@ -498,6 +503,8 @@ run_querydb() {
             echo "}"
         } > "$config_file"
         cmd=("uQueryDB" "$config_file" "${QUERY_ARGS[@]}")
+    elif [ "$QUERY_FILE_MODE" = "direct" ]; then
+        cmd=("uQueryDB" "--host=localhost" "--port=$port" "${QUERY_ARGS[@]}")
     else
         {
             echo "ServerHost = localhost"
@@ -509,18 +516,20 @@ run_querydb() {
 
     (
         cd "$case_dir" || exit 1
+        set -m
         "${cmd[@]}" > "$output" 2>&1 &
         query_pid=$!
+        set +m
         deadline=$((SECONDS + 8))
-        while kill -0 "$query_pid" 2>/dev/null; do
+        while kill -0 -- "-$query_pid" 2>/dev/null; do
             if [ "$SECONDS" -ge "$deadline" ]; then
-                kill -TERM "$query_pid" 2>/dev/null || true
+                kill -TERM -- "-$query_pid" 2>/dev/null || true
                 for ((stop_attempt = 0; stop_attempt < 20; stop_attempt++)); do
-                    kill -0 "$query_pid" 2>/dev/null || break
+                    kill -0 -- "-$query_pid" 2>/dev/null || break
                     sleep 0.1
                 done
-                if kill -0 "$query_pid" 2>/dev/null; then
-                    kill -KILL "$query_pid" 2>/dev/null || true
+                if kill -0 -- "-$query_pid" 2>/dev/null; then
+                    kill -KILL -- "-$query_pid" 2>/dev/null || true
                 fi
                 wait "$query_pid" 2>/dev/null || true
                 exit 124
