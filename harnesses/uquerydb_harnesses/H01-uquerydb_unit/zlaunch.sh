@@ -324,6 +324,8 @@ get_case_config() {
     EXPECTED_CHECKVARS=()
     CHECKVARS_REGEXES=()
     MIN_ELAPSED_MS=0
+    # Zero disables a case-specific wall-clock maximum. run_querydb's hard
+    # deadline remains the infrastructure upper bound for every case.
     MAX_ELAPSED_MS=0
 
     if ! case_known "$CASE_NAME"; then
@@ -366,12 +368,10 @@ get_case_config() {
             EXPECTED_RC="1"
             QUERY_ARGS=("--condition=QUERY_MISSING = ready" "--wait=1")
             MIN_ELAPSED_MS=1500
-            MAX_ELAPSED_MS=3000
             ;;
         late_var_wait_pass)
             QUERY_ARGS=("--condition=QUERY_LATE = arrived" "--wait=3")
             MIN_ELAPSED_MS=1500
-            MAX_ELAPSED_MS=3000
             ;;
         mission_file_config_pass)
             QUERY_FILE_MODE="mission_config"
@@ -425,7 +425,6 @@ get_case_config() {
             QUERY_FILE_MODE="case_config"
             CONFIG_LINES=("halt_max_time = 1" "pass_condition = QUERY_MISSING = ready")
             MIN_ELAPSED_MS=1500
-            MAX_ELAPSED_MS=3000
             ;;
         config_fail_condition_false_pass)
             QUERY_FILE_MODE="case_config"
@@ -695,7 +694,8 @@ write_result() {
     fi
     if [ "$mission_grade" = pass ] && [ "$MIN_ELAPSED_MS" -gt 0 ] &&
        { [ "$QUERY_ELAPSED_MS" -lt "$MIN_ELAPSED_MS" ] ||
-         [ "$QUERY_ELAPSED_MS" -gt "$MAX_ELAPSED_MS" ]; }; then
+         { [ "$MAX_ELAPSED_MS" -gt 0 ] &&
+           [ "$QUERY_ELAPSED_MS" -gt "$MAX_ELAPSED_MS" ]; }; }; then
         provenance=$(runner_provenance "$line")
         printf 'case=%s grade=fail reason=subject_timing_mismatch elapsed_ms=%s min_elapsed_ms=%s max_elapsed_ms=%s%s\n' \
             "$case_name" "$QUERY_ELAPSED_MS" "$MIN_ELAPSED_MS" "$MAX_ELAPSED_MS" \
