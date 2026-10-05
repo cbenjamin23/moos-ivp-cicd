@@ -176,7 +176,7 @@
       },
       "bhvutil": {
         "path": "tests/cpp/bhvutil",
-        "source_count": 9,
+        "source_count": 10,
         "subareas": [
           "AOFs",
           "ExFilterSet",
@@ -184,6 +184,7 @@
           "LegRun",
           "LoiterEngine",
           "ObShipModelV24",
+          "OpRegionAOF",
           "Refineries",
           "WaypointEngine",
           "WaypointEngineX"
@@ -225,6 +226,11 @@
         "subareas": [
           "AppGenerator"
         ]
+      },
+      "gen_poly": {
+        "path": "tests/cpp/gen_poly",
+        "source_count": 1,
+        "subareas": []
       },
       "genutil": {
         "path": "tests/cpp/genutil",
@@ -407,6 +413,16 @@
         "subareas": [
           "Obstacle"
         ]
+      },
+      "opregion": {
+        "path": "tests/cpp/opregion",
+        "source_count": 0,
+        "subareas": []
+      },
+      "opregion-known-issues": {
+        "path": "tests/cpp/opregion-known-issues",
+        "source_count": 0,
+        "subareas": []
       },
       "pechovar": {
         "path": "tests/cpp/pechovar",
@@ -605,6 +621,7 @@
       "encounters",
       "evalutil",
       "gen_moos_app",
+      "gen_poly",
       "genutil",
       "geodaid",
       "geometry",
@@ -629,6 +646,8 @@
       "nspatch",
       "nsplug",
       "obstacles",
+      "opregion",
+      "opregion-known-issues",
       "pechovar",
       "pickpos",
       "pluck",
@@ -650,7 +669,7 @@
       "zaicview"
     ],
     "path": "tests/cpp",
-    "source_count": 215,
+    "source_count": 219,
     "source_count_by_family": {
       "alogavg": 1,
       "alogbin": 1,
@@ -675,12 +694,13 @@
       "alogtm": 1,
       "apputil": 3,
       "behaviors": 5,
-      "bhvutil": 9,
+      "bhvutil": 10,
       "contacts": 3,
       "dep_behaviors": 2,
       "encounters": 1,
       "evalutil": 3,
       "gen_moos_app": 1,
+      "gen_poly": 1,
       "genutil": 2,
       "geodaid": 1,
       "geometry": 32,
@@ -4486,6 +4506,78 @@
       }
     },
     {
+      "artifact": "manual-opregion-h02-results",
+      "docs": {
+        "family_label": "Behavior Correctness",
+        "generated_page": "docs/harnesses/opregion-v26.html",
+        "mission": "missions/opregion_missions/opregion_motion",
+        "slug": "opregion-v26",
+        "source": "docs/tools/build_pages.py",
+        "title": "H02 OpRegion V26"
+      },
+      "families": [
+        "opregion"
+      ],
+      "focus_process_apps": [
+        "pEchoVar",
+        "pHelmIvP",
+        "pMarinePIDV22",
+        "pNodeReporter",
+        "uFldNodeBroker",
+        "uFldNodeComms",
+        "uFldShoreBroker",
+        "uSimMarineV22"
+      ],
+      "harness": "H02-opregion_v26",
+      "key": "opregion_h02",
+      "mission": {
+        "path": "missions/opregion_missions/opregion_motion"
+      },
+      "patches": {
+        "file_count": 19
+      },
+      "path": "harnesses/opregion_harnesses/H02-opregion_v26",
+      "perf_profile": "",
+      "process_apps": [
+        "ANTLER",
+        "pAutoPoke",
+        "pEchoVar",
+        "pHelmIvP",
+        "pHostInfo",
+        "pLogger",
+        "pMarinePIDV22",
+        "pMarineViewer",
+        "pMissionEval",
+        "pNodeReporter",
+        "pShare",
+        "uFldNodeBroker",
+        "uFldNodeComms",
+        "uFldShoreBroker",
+        "uLoadWatch",
+        "uProcessWatch",
+        "uSimMarineV22",
+        "uTimerScript"
+      ],
+      "zlaunch": {
+        "case_count": 8,
+        "case_parse_error": "",
+        "cases": [
+          "convex_contained_keepin_pass",
+          "nonconvex_contained_keepin_pass",
+          "lapsed_recovery_pass",
+          "entry_gate_start_outside_pass",
+          "dynamic_region_update_pass",
+          "stay_in_disabled_breach_pass",
+          "metric_distance_macro_pass",
+          "delayed_breach_flag_pass"
+        ],
+        "helpers": [
+          "scripts/moos_scoped_teardown.sh"
+        ],
+        "path": "harnesses/opregion_harnesses/H02-opregion_v26/zlaunch.sh"
+      }
+    },
+    {
       "artifact": "manual-p01-obstacle-results",
       "docs": {
         "family_label": "Performance",
@@ -5908,7 +6000,8 @@
         "obstacle_behavior_h01"
       ],
       "opregion": [
-        "opregion_h01"
+        "opregion_h01",
+        "opregion_h02"
       ],
       "pantler": [
         "pantler_h01"
@@ -6050,6 +6143,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "pantler_h01",
         "pdeadmanpost_h01",
@@ -6128,6 +6222,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6170,6 +6265,7 @@
         "legrun_h01",
         "loiter_h01",
         "opregion_h01",
+        "opregion_h02",
         "pechovar_h01",
         "processwatch_h01",
         "shadow_h01",
@@ -6204,6 +6300,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6242,6 +6339,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6283,6 +6381,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6349,6 +6448,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6385,6 +6485,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6428,6 +6529,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6507,6 +6609,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6552,6 +6655,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6628,6 +6732,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6666,6 +6771,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6714,6 +6820,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6752,6 +6859,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6796,6 +6904,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6844,6 +6953,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6904,6 +7014,7 @@
         "obmgr_h02",
         "obstacle_behavior_h01",
         "opregion_h01",
+        "opregion_h02",
         "p01_obstacle",
         "p02_colregs",
         "p03_colregs",
@@ -6959,29 +7070,29 @@
   },
   "repo": {
     "file_counts_by_suffix": {
-      ".bhv": 31,
-      ".cpp": 221,
+      ".bhv": 32,
+      ".cpp": 225,
       ".css": 3,
       ".gif": 1,
       ".h": 13,
-      ".html": 74,
+      ".html": 75,
       ".js": 1,
       ".json": 2,
-      ".md": 146,
+      ".md": 149,
       ".mjo": 1,
       ".moos": 152,
       ".mp4": 149,
       ".png": 4,
       ".py": 39,
-      ".sh": 360,
-      ".txt": 302,
-      ".xbhv": 451,
-      ".xmoos": 1349,
+      ".sh": 361,
+      ".txt": 305,
+      ".xbhv": 459,
+      ".xmoos": 1359,
       "[none]": 6
     },
-    "harness_patch_count": 1695,
-    "harness_target_count": 67,
-    "harness_zlaunch_count": 67,
+    "harness_patch_count": 1714,
+    "harness_target_count": 68,
+    "harness_zlaunch_count": 68,
     "mission_config_count": 468,
     "root": "."
   },

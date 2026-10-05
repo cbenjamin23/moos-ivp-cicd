@@ -1,0 +1,162 @@
+name: OpRegion regression gate
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/opregion.yml'
+      - 'CMakeLists.txt'
+      - 'tests/cpp/**'
+      - 'tests/test_ci_cpp_test_targets.py'
+      - 'scripts/**'
+      - 'config/harness_targets.json'
+      - 'harnesses/opregion_harnesses/**'
+      - 'missions/opregion_missions/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/opregion.yml'
+      - 'CMakeLists.txt'
+      - 'tests/cpp/**'
+      - 'tests/test_ci_cpp_test_targets.py'
+      - 'scripts/**'
+      - 'config/harness_targets.json'
+      - 'harnesses/opregion_harnesses/**'
+      - 'missions/opregion_missions/**'
+  workflow_dispatch:
+    inputs:
+      upstream_ref:
+        description: 'MOOS-IvP SHA or branch to assess (blank uses the validated pin)'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: opregion-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: bash
+        working-directory: cicd
+    steps:
+      - name: Check out test workspace
+        uses: actions/checkout@v6
+        with:
+          path: cicd
+          persist-credentials: false
+
+      - name: Clear inherited mission verdicts
+        run: |
+          # Tracked results may describe an older local run, not this job.
+          rm -f harnesses/opregion_harnesses/H02-opregion_v26/results.txt \
+            harnesses/opregion_harnesses/H01-opregion_safety/results.txt
+
+      - name: Check out upstream candidate
+        uses: actions/checkout@v6
+        with:
+          repository: moos-ivp/moos-ivp
+          # Update this pin only after the required and known-issue contracts run.
+          ref: ${{ inputs.upstream_ref || '3f0928a9712f802d020414e190ed21a1a028d34b' }}
+          path: moos-ivp
+          persist-credentials: false
+
+      - name: Record source revision
+        run: |
+          set -euo pipefail
+          revision=$(git -C ../moos-ivp rev-parse HEAD)
+          # shellcheck disable=SC2016
+          printf '## OpRegion validation\n\nUpstream revision: `%s`\n' "$revision" >> "$GITHUB_STEP_SUMMARY"
+          printf '%s/bin\n%s/scripts\n' "$GITHUB_WORKSPACE/moos-ivp" "$GITHUB_WORKSPACE/moos-ivp" >> "$GITHUB_PATH"
+
+      - name: Install headless build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build python3 lsof patch
+
+      - name: Build upstream without GUI
+        working-directory: moos-ivp
+        run: |
+          set -euo pipefail
+          ./build-moos.sh --minrobot --fetch-proj=on -j2
+          ./build-ivp.sh --nogui -j2
+
+      - name: Configure and compile regression contracts
+        id: contracts
+        run: |
+          set -euo pipefail
+          cmake -S . -B build -G Ninja \
+            -DMOOSIVP_SOURCE_TREE_BASE="$GITHUB_WORKSPACE/moos-ivp" \
+            -DMOOS_DIR="$GITHUB_WORKSPACE/moos-ivp/build/MOOS/MOOSCore" \
+            -DMOOSGeodesy_DIR="$GITHUB_WORKSPACE/moos-ivp/build/MOOS/MOOSGeodesy" \
+            -DMOOS_ENABLE_KNOWN_ISSUE_TESTS=ON
+          cmake --build build --parallel 2 --target \
+            ctest-family-opregion ctest-family-opregion-known-issues ctest-family-bhvutil
+
+      - name: Required C++ contracts
+        id: required_cpp
+        run: |
+          python3 scripts/ci_cpp_test_targets.py run --build-dir build \
+            --targets opregion,bhvutil --reports-dir build/opregion-reports \
+            --summary-path "$GITHUB_STEP_SUMMARY"
+
+      - name: Known upstream defects (non-blocking, desired-state assertions)
+        id: known
+        if: ${{ !cancelled() && steps.contracts.outcome == 'success' }}
+        continue-on-error: true
+        run: |
+          python3 scripts/ci_cpp_test_targets.py run --build-dir build \
+            --targets opregion-known-issues --reports-dir build/opregion-reports \
+            --summary-path "$GITHUB_STEP_SUMMARY"
+
+      - name: V26 mission contracts
+        id: v26
+        if: ${{ !cancelled() && steps.required_cpp.outcome == 'success' }}
+        working-directory: cicd/harnesses/opregion_harnesses/H02-opregion_v26
+        run: ./zlaunch.sh --jobs=2 --port_base=22000 --keep_workdirs 10
+
+      - name: V24 compatibility contracts
+        id: v24
+        if: ${{ !cancelled() && steps.required_cpp.outcome == 'success' }}
+        working-directory: cicd/harnesses/opregion_harnesses/H01-opregion_safety
+        run: ./zlaunch.sh --jobs=2 --port_base=24000 --keep_workdirs 10
+
+      - name: Summarize known-issue status and mission verdicts
+        if: ${{ always() }}
+        env:
+          KNOWN_OUTCOME: ${{ steps.known.outcome }}
+          V26_OUTCOME: ${{ steps.v26.outcome }}
+          V24_OUTCOME: ${{ steps.v24.outcome }}
+        run: |
+          # shellcheck disable=SC2016
+          printf '\n### Known upstream defects\n\nOutcome: `%s`. These checks do not block the regression gate; a green gate is not a safety release approval. Promote each contract after its upstream fix.\n' "$KNOWN_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
+          # shellcheck disable=SC2016
+          printf '\nMission steps: V26 `%s`, V24 `%s`.\n' "$V26_OUTCOME" "$V24_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
+          for harness in H02-opregion_v26 H01-opregion_safety; do
+            report="harnesses/opregion_harnesses/$harness/results.txt"
+            if [[ -f "$report" ]]; then
+              {
+                printf '\n### %s\n\n```text\n' "$harness"
+                tail -n 40 "$report"
+                printf '\n```\n'
+              } >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: Preserve reports and mission evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: opregion-regression-evidence
+          retention-days: 7
+          include-hidden-files: true
+          path: |
+            cicd/build/opregion-reports/
+            cicd/build/Testing/Temporary/
+            cicd/harnesses/opregion_harnesses/H*/results.txt
+            cicd/harnesses/opregion_harnesses/H*/.harness_runs/

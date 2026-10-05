@@ -245,6 +245,18 @@
           <p>Posts a shrink from east edge x=47 to x=5 after six seconds while retaining the stock eight-meter halt distance, testing immediate enforcement of a recomputed halt boundary; the harness passes when HALT_REGION_BREACHED=true and a behavior error appear without a time breach.</p>
         </article>
 
+
+        <article class="case-row">
+          <code>explicit_polygons_pass</code>
+          <p>Uses explicit save_poly and halt_poly values instead of generated distance buffers, routes outside the explicit save polygon while remaining inside the explicit halt polygon, and requires save recovery without a halt breach.</p>
+        </article>
+
+
+        <article class="case-row">
+          <code>explicit_halt_poly_fail</code>
+          <p>Uses an explicit halt polygon ending at x=25, routes through x=34, and requires the explicit halt boundary to produce the expected halt breach.</p>
+        </article>
+
       </div>
     </section>
 

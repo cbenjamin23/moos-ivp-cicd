@@ -1,0 +1,36 @@
+ProcessConfig = uTimerScript
+{
+  AppTick   = 2
+  CommsTick = 2
+  condition = DEPLOY_ALL = true
+  event = var=TEST_EVAL_READY, val=true, time=4
+}
+
+ProcessConfig = pMissionEval
+{
+  AppTick   = 4
+  CommsTick = 4
+  mailflag = @BHV_ERROR#BHV_ERROR_SEEN=true
+
+  lead_condition = TEST_EVAL_READY = true
+  pass_condition = OPREG_EXEC_SEEN > 4
+  pass_condition = OPREG_EXEC_SEEN <= 14
+  pass_condition = HALT_REGION_BREACHED = false
+  pass_condition = BHV_ERROR_SEEN = false
+
+  result_flag = MISSION_EVALUATED = true
+  pass_flag   = SAY_MOOS = pass
+  fail_flag   = SAY_MOOS = fail
+  mission_form = opregion_v26_tests
+  mission_mod  = $(MMOD:=metric_distance_macro_pass)
+  report_file   = results.txt
+  prereport_column = expected=metric_distance_between_4_and_14
+  report_column = grade=$[GRADE]
+  report_column = form=$[MISSION_FORM]
+  report_column = mmod=$[MMOD]
+  report_column = eval=$[TEST_EVAL_READY]
+  report_column = abs_dist=$[OPREG_EXEC_SEEN]
+  report_column = breached=$[HALT_REGION_BREACHED]
+  report_column = bhv_error=$[BHV_ERROR_SEEN]
+  report_column = mhash=$[MHASH_SHORT]
+}

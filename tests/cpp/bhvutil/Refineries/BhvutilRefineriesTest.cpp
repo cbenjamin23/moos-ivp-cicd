@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "CPAEngine.h"
+#include "CPXEngineOG.h"
 #include "IvPBuildTestUtils.h"
 #include "NumericAssertions.h"
 #include "ObShipModelV24.h"
@@ -106,7 +106,7 @@ bool hasPlateau(const std::vector<IvPBox>& regions, int value)
 // Covers refinery CPA behavior: rejects invalid initialization contracts.
 TEST(RefineryCPATest, RejectsInvalidInitializationContracts)
 {
-  CPAEngine engine(100, 0, 180, 2, 0, 0);
+  CPXEngineOG engine(100, 0, 180, 2, 0, 0);
   RefineryCPA refinery;
 
   EXPECT_FALSE(refinery.init(0, 0, 0, 100, 180, 2, 60,
@@ -127,7 +127,7 @@ TEST(RefineryCPATest, RejectsInvalidInitializationContracts)
 TEST(RefineryCPATest, BuildsAftContactRegionsForAvoidCollisionIvPFunctions)
 {
   IvPDomain domain = makeCourseSpeedOnlyDomain();
-  CPAEngine engine(100, 0, 0, 1, 0, 0);
+  CPXEngineOG engine(100, 0, 0, 1, 0, 0);
   RefineryCPA refinery;
   ASSERT_TRUE(refinery.init(0, 0, 0, 100, 0, 1, 60,
                             10, 40, domain, &engine));
@@ -143,7 +143,7 @@ TEST(RefineryCPATest, BuildsAftContactRegionsForAvoidCollisionIvPFunctions)
 TEST(RefineryCPATest, BuildsForeContactRegionsForCutRangeGeometry)
 {
   IvPDomain domain = makeCourseSpeedOnlyDomain();
-  CPAEngine engine(100, 100, 270, 2, 0, 0);
+  CPXEngineOG engine(100, 100, 270, 2, 0, 0);
   RefineryCPA refinery;
   ASSERT_TRUE(refinery.init(0, 0, 100, 100, 270, 2, 120,
                             10, 40, domain, &engine));
@@ -158,7 +158,7 @@ TEST(RefineryCPATest, BuildsForeContactRegionsForCutRangeGeometry)
 TEST(RefineryCPATest, PinsForeOutVelocityConeRegionsForBhvAvoidCollision)
 {
   IvPDomain domain = makeCourseSpeedOnlyDomain();
-  CPAEngine engine(0, 100, 0, 2, 0, 0);
+  CPXEngineOG engine(0, 100, 0, 2, 0, 0);
   RefineryCPA refinery;
   ASSERT_TRUE(refinery.init(0, 0, 100, 0, 0, 2, 60,
                             10, 40, domain, &engine));
@@ -179,7 +179,7 @@ TEST(RefineryCPATest, PinsForeOutVelocityConeRegionsForBhvAvoidCollision)
 TEST(RefineryCPATest, PinsForeInVelocityConeRegionsForClosingContact)
 {
   IvPDomain domain = makeCourseSpeedOnlyDomain();
-  CPAEngine engine(0, 100, 270, 2, 0, 0);
+  CPXEngineOG engine(0, 100, 270, 2, 0, 0);
   RefineryCPA refinery;
   ASSERT_TRUE(refinery.init(0, 0, 100, 0, 270, 2, 60,
                             10, 40, domain, &engine));
@@ -200,7 +200,7 @@ TEST(RefineryCPATest, PinsForeInVelocityConeRegionsForClosingContact)
 TEST(RefineryCPATest, ExposesSnappingAndHeadingSweepBoundariesUsedByRefineries)
 {
   IvPDomain domain = makeCourseSpeedOnlyDomain();
-  CPAEngine engine(0, 100, 270, 2, 0, 0);
+  CPXEngineOG engine(0, 100, 270, 2, 0, 0);
   TestableRefineryCPA refinery;
   ASSERT_TRUE(refinery.init(0, 0, 100, 0, 270, 2, 60,
                             10, 40, domain, &engine));
@@ -234,7 +234,7 @@ TEST(RefineryCPATest, ExposesSnappingAndHeadingSweepBoundariesUsedByRefineries)
 TEST(RefineryCPATest, PinsProtectedSearchHelpersAcrossCourseAndSpeedDomain)
 {
   IvPDomain domain = makeCourseSpeedOnlyDomain();
-  CPAEngine engine(0, 100, 270, 2, 0, 0);
+  CPXEngineOG engine(0, 100, 270, 2, 0, 0);
   TestableRefineryCPA refinery;
   ASSERT_TRUE(refinery.init(0, 0, 100, 0, 270, 2, 60,
                             10, 40, domain, &engine));

@@ -12,7 +12,7 @@ add_moos_cpp_test(test_bhvutil_aofs
     AOF
   SUITE_LABELS
     AOFWaypointTest=AOF_Waypoint,BHV_Waypoint
-    AOFContactTest=AOF_Contact
+    AOFContactXTest=AOF_ContactX
     AOFAvoidCollisionTest=AOF_AvoidCollision,BHV_AvoidCollision
     AOFAvoidCollisionDepthTest=AOF_AvoidCollisionDepth,BHV_AvoidCollisionDepth
     AOFAvoidObstacleV24Test=AOF_AvoidObstacleV24,BHV_AvoidObstacleV24

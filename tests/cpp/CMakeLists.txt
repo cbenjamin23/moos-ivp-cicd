@@ -138,6 +138,14 @@ function(add_moos_cpp_test target)
 endfunction()
 
 add_subdirectory(geometry)
+add_subdirectory(gen_poly)
+
+# Desired-state checks for acknowledged upstream defects. The OpRegion workflow
+# enables them and publishes their real failures separately from its required gate.
+option(MOOS_ENABLE_KNOWN_ISSUE_TESTS "Build known upstream defect contracts" OFF)
+if(MOOS_ENABLE_KNOWN_ISSUE_TESTS)
+  add_subdirectory(known_issues)
+endif()
 
 add_subdirectory(ivpbuild)
 add_subdirectory(ivpcore)

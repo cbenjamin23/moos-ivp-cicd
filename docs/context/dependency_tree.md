@@ -8,11 +8,11 @@ repo files should be opened next?
 
 ## Summary
 
-- Harness targets: `67`
-- Harness launchers: `67` under `harnesses/**/zlaunch.sh`
-- Harness patch/config files: `1695` under configured targets
+- Harness targets: `68`
+- Harness launchers: `68` under `harnesses/**/zlaunch.sh`
+- Harness patch/config files: `1714` under configured targets
 - Mission launch/config files: `468` under `missions/`
-- C++ test sources: `215`
+- C++ test sources: `219`
 
 ## Repo Layers
 
@@ -131,6 +131,7 @@ jq '.cpp_tests.families.mbutil' docs/context/dependency_tree.json
 | `loiter_h01` | `loiter_behavior` | `harnesses/loiter_behavior_harnesses/H01-loiter_behavior_motion/zlaunch.sh` | `missions/loiter_behavior_missions/loiter_behavior_motion` | 29 | `pEchoVar` | `loiter-behavior-motion` |
 | `obstacle_behavior_h01` | `obstacle_behavior` | `harnesses/obstacle_behavior_harnesses/H01-obstacle_behavior_motion/zlaunch.sh` | `missions/obstacle_behavior_missions/obstacle_behavior_motion` | 21 | `pObstacleMgr`, `uFldCollObDetect` | `obstacle-behavior-motion` |
 | `opregion_h01` | `opregion` | `harnesses/opregion_harnesses/H01-opregion_safety/zlaunch.sh` | `missions/opregion_missions/opregion_motion` | 27 | `pEchoVar` | `opregion-safety` |
+| `opregion_h02` | `opregion` | `harnesses/opregion_harnesses/H02-opregion_v26/zlaunch.sh` | `missions/opregion_missions/opregion_motion` | 8 | `pEchoVar` | `opregion-v26` |
 | `p01_obstacle` | `performance` | `harnesses/performance_harnesses/P01-obstacle_gauntlet/zlaunch.sh` | `missions/performance_missions/P01-obstacle_gauntlet` | 3 | `uFldObstacleSim`, `pObstacleMgr`, `uFldCollObDetect` | `performance-obstacle-gauntlet` |
 | `shadow_h01` | `shadow_behavior` | `harnesses/shadow_behavior_harnesses/H01-shadow_behavior_motion/zlaunch.sh` | `missions/shadow_behavior_missions/shadow_behavior_motion` | 28 | `pEchoVar`, `pContactMgrV20` | `shadow-behavior-motion` |
 | `stationkeep_h01` | `stationkeep_behavior` | `harnesses/stationkeep_behavior_harnesses/H01-stationkeep_behavior_motion/zlaunch.sh` | `missions/stationkeep_behavior_missions/stationkeep_behavior_motion` | 33 | `pEchoVar` | `stationkeep-behavior-motion` |
@@ -160,6 +161,7 @@ start by checking every listed target.
 - `missions/colregs_missions/colregs_unit`: `colregs_h01`, `colregs_h02`, `colregs_h03`, `colregs_h04`
 - `missions/mission_utility_missions/mission_utility_unit`: `pmissioneval_h01`, `pmissionhash_h01`, `umayfinish_h01`
 - `missions/ufield_comms_missions/ufield_comms_unit`: `ufield_comms_h01`, `ufield_comms_h02`, `ufield_comms_h03`
+- `missions/opregion_missions/opregion_motion`: `opregion_h01`, `opregion_h02`
 
 ## Low-Fanout App Index
 
@@ -172,7 +174,7 @@ the full `ProcessConfig` map is in `docs/context/dependency_tree.json`.
 - `iM300Health`: `p02_colregs`, `p03_colregs`
 - `pContactMgrV20`: `cmgr_h01`, `cmgr_h02`, `collision_h01`, `colregs_h01`, `colregs_h02`, `colregs_h03`, `colregs_h04`, `convoy_h01`, `cutrange_h01`, `p02_colregs`, `p03_colregs`, `shadow_h01`, `trail_h01`
 - `pDeadManPost`: `pdeadmanpost_h01`
-- `pEchoVar`: `legrun_h01`, `loiter_h01`, `opregion_h01`, `pechovar_h01`, `processwatch_h01`, `shadow_h01`, `stationkeep_h01`, `trail_h01`, `ufld_obstacle_sim_h01`, `utermcommand_h01`, `waypoint_h01`
+- `pEchoVar`: `legrun_h01`, `loiter_h01`, `opregion_h01`, `opregion_h02`, `pechovar_h01`, `processwatch_h01`, `shadow_h01`, `stationkeep_h01`, `trail_h01`, `ufld_obstacle_sim_h01`, `utermcommand_h01`, `waypoint_h01`
 - `pGapLatch`: `testfailure_h01`
 - `pMediator`: `ufield_comms_h02`
 - `pMissionEvalAlpha`: `ufld_beacon_range_sensor_h01`, `ufld_collision_detect_h01`, `ufld_pathcheck_h01`

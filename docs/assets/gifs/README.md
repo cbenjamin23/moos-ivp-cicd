@@ -363,6 +363,15 @@ Typical capture launch: `./zlaunch.sh --case=save_recover_pass --gui 10`
 - source `opregion-safety-dynamic-update.gif` -> published `opregion-safety-dynamic-update.mp4` - Dynamic Region Update; representative case `dynamic_region_update_pass`
 - source `opregion-safety-entry-gate.gif` -> published `opregion-safety-entry-gate.mp4` - Entry Gate; representative case `entry_gate_start_outside_pass`
 
+## H02 OpRegion V26
+
+Capture from: `harnesses/opregion_harnesses/H02-opregion_v26`
+Typical capture launch: `./zlaunch.sh --jobs=2 --port_base=22000 10`
+
+- Visual pending - Convex Keep-In; representative case `convex_contained_keepin_pass`
+- Visual pending - Non-Convex Keep-In; representative case `nonconvex_contained_keepin_pass`
+- Visual pending - Lapsed Recovery; representative case `lapsed_recovery_pass`
+
 ## H01 Waypoint Behavior
 
 Capture from: `harnesses/waypoint_behavior_harnesses/H01-waypoint_behavior_motion`

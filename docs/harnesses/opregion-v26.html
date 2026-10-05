@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H02 OpRegion V26 | MOOS-IvP CI/CD</title>
+  <link rel="stylesheet" href="../styles.css?v=20260719-1">
+  <script src="../theme.js?v=20260719-1"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark">CI</span>
+      <span>MOOS-IvP CI/CD</span>
+    </a>
+    <div class="header-actions">
+      <nav>
+        <a href="../quick-start.html">Quick Start</a>
+        <a href="../index.html#families">Harnesses</a>
+        <a href="../ctest-coverage.html">Unit Tests</a>
+        <a href="../examples.html">Examples</a>
+      </nav>
+      <label class="theme-switch" title="Toggle Frost theme">
+        <input type="checkbox" data-theme-toggle aria-label="Frost theme">
+        <span class="theme-switch-track" aria-hidden="true"><!-- CSS-rendered track --></span>
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <a class="back-link" href="../index.html#families">Back to catalog</a>
+      <p class="eyebrow">Behavior Correctness</p>
+      <h1>H02 OpRegion V26</h1>
+      <p class="lede">Behavior correctness tests for BHV_OpRegionV26. These cases isolate generalized-polygon parsing, active contained-state keep-in, lapsed recovery, entry gating, runtime region replacement, disabled keep-in, metric distance output, and delayed breach flags.</p>
+    </section>
+
+
+    <section class="content-section compact-section">
+      <article class="stem-card">
+        <p class="eyebrow">Stem Mission</p>
+        <h2>Baseline scenario context</h2>
+        <p>The harness copies the proven OpRegion motion mission, replaces its behavior stem with one BHV_OpRegionV26 instance, and applies isolated case overlays for generalized borders, convex covers, recovery geometry, runtime updates, and mission-owned regression evidence.</p>
+      </article>
+    </section>
+
+
+
+    <section class="content-section">
+      <div class="section-heading">
+        <p class="eyebrow">Examples</p>
+        <h2>Representative runs</h2>
+      </div>
+
+      <div class="gif-grid">
+      <article class="gif-card">
+        <div class="gif-frame gif-frame--pending" data-file="pending">
+        </div>
+        <div class="gif-meta">
+          <h3>Convex Keep-In</h3>
+          <p>Description: runs a contained transit in a single-cover convex region and requires an active V26 execution signal with no lapse or breach.</p>
+        </div>
+      </article>
+
+
+      <article class="gif-card">
+        <div class="gif-frame gif-frame--pending" data-file="pending">
+        </div>
+        <div class="gif-meta">
+          <h3>Non-Convex Keep-In</h3>
+          <p>Description: runs the same contained transit through an L-shaped generalized border represented by two convex cover polygons.</p>
+        </div>
+      </article>
+
+
+      <article class="gif-card">
+        <div class="gif-frame gif-frame--pending" data-file="pending">
+        </div>
+        <div class="gif-meta">
+          <h3>Lapsed Recovery</h3>
+          <p>Description: temporarily shrinks the active border around a moving vehicle without reaching the breach distance, then restores the region and requires recovery evidence plus route completion.</p>
+        </div>
+      </article>
+
+      </div>
+    </section>
+
+
+    <section class="content-section">
+      <div class="section-heading">
+        <p class="eyebrow">Case Matrix</p>
+        <h2>All cases</h2>
+      </div>
+      <div class="case-matrix">
+
+        <article class="case-row">
+          <code>convex_contained_keepin_pass</code>
+          <p>runs a contained transit in a single-cover convex region and requires an active V26 execution signal with no lapse or breach.</p>
+        </article>
+
+
+        <article class="case-row">
+          <code>nonconvex_contained_keepin_pass</code>
+          <p>runs the same contained transit through an L-shaped generalized border represented by two convex cover polygons.</p>
+        </article>
+
+
+        <article class="case-row">
+          <code>lapsed_recovery_pass</code>
+          <p>temporarily shrinks the active border around a moving vehicle without reaching the breach distance, then restores the region and requires recovery evidence plus route completion.</p>
+        </article>
+
+
+        <article class="case-row">
+          <code>entry_gate_start_outside_pass</code>
+          <p>starts outside the region with entry gating enabled and requires the waypoint behavior to carry the vehicle inside before containment becomes active.</p>
+        </article>
+
+
+        <article class="case-row">
+          <code>dynamic_region_update_pass</code>
+          <p>replaces the generalized polygon at runtime and requires the resulting lapsed/recovery transition without a terminal breach.</p>
+        </article>
+
+
+        <article class="case-row">
+          <code>stay_in_disabled_breach_pass</code>
+          <p>disables the new contained-state keep-in objective and passes when the expected terminal breach and helm error are observed.</p>
+        </article>
+
+
+        <article class="case-row">
+          <code>metric_distance_macro_pass</code>
+          <p>requires a real distance between 4 and 14 meters in the controlled short transit, rejecting the former boolean 1.</p>
+        </article>
+
+
+        <article class="case-row">
+          <code>delayed_breach_flag_pass</code>
+          <p>requires both the configured breach flag and helm error after the delay expires.</p>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="source-strip">
+      <h2>Source links</h2>
+      <a href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/harnesses/opregion_harnesses/H02-opregion_v26/README.md">Harness README</a>
+      <a href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/missions/opregion_missions/opregion_motion/README.md">Mission README</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Overview site for the MOOS-IvP CI/CD test workspace.</span>
+    <span>Source mission and harness links are included for readers who want implementation detail.</span>
+  </footer>
+</body>
+</html>

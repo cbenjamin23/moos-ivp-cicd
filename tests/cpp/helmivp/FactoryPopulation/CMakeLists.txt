@@ -10,6 +10,7 @@ add_moos_cpp_test(test_helmivp_behavior_loading
     helmivp
     bhvutil
     contacts
+    gen_poly
     genutil
     logic
     turngeo
@@ -22,7 +23,7 @@ add_moos_cpp_test(test_helmivp_behavior_loading
     helmivp
     pHelmIvP
   SUITE_LABELS
-    BFactoryStaticTest=BFactoryStatic
+    BFactoryStaticTest=BFactoryStatic,opregion
     BFactoryDynamicTest=BFactoryDynamic
     SpecBuildTest=SpecBuild
     BehaviorSetTest=BehaviorSet

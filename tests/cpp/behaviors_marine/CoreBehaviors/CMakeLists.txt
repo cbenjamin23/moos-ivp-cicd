@@ -419,6 +419,20 @@ add_moos_cpp_test(test_behaviors_marine_op_region_v24
     pHelmIvP
 )
 
+add_moos_cpp_test(test_behaviors_marine_op_region_v26
+  SOURCES
+    OpRegionV26Test.cpp
+  LIBS
+    ${BEHAVIORS_MARINE_COMMON_LIBS}
+    gen_poly
+  LABELS
+    behaviors-marine
+    opregion
+    BHV_OpRegionV26
+    AOF_OpRegion
+    pHelmIvP
+)
+
 add_moos_cpp_test(test_behaviors_marine_pmodel_view
   SOURCES
     PModelViewTest.cpp

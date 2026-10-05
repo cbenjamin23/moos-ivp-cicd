@@ -1,0 +1,8 @@
+ProcessConfig = uTimerScript
+{
+  AppTick   = 2
+  CommsTick = 2
+  condition = DEPLOY = true
+  event = var=OPREGION_CORE_POLY, val="border={-23,-135:0,-135:0,-107:-23,-107},label=recover_shrunk # poly={-23,-135:0,-135:0,-107:-23,-107},label=recover_shrunk_cover", time=10
+  event = var=OPREGION_CORE_POLY, val="border={-23,-135:30,-135:30,-107:-23,-107},label=recover_restored # poly={-23,-135:30,-135:30,-107:-23,-107},label=recover_restored_cover", time=20
+}

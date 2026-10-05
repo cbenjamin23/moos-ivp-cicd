@@ -1,0 +1,18 @@
+add_moos_cpp_test(test_bhvutil_aof_op_region
+  SOURCES
+    OpRegionAOFTest.cpp
+  LIBS
+    bhvutil
+    gen_poly
+    helmivp
+    ivpbuild
+    ivpcore
+    geometry
+    mbutil
+  LABELS
+    bhvutil
+    opregion
+    AOF
+    AOF_OpRegion
+    BHV_OpRegionV26
+)
