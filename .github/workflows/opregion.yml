@@ -5,23 +5,31 @@ on:
     paths:
       - '.github/workflows/opregion.yml'
       - 'CMakeLists.txt'
-      - 'tests/cpp/**'
-      - 'tests/test_ci_cpp_test_targets.py'
+      - 'tests/**'
       - 'scripts/**'
       - 'config/harness_targets.json'
       - 'harnesses/opregion_harnesses/**'
+      - 'harnesses/**/zlaunch.sh'
       - 'missions/opregion_missions/**'
+      - 'harnesses/ufield_comms_harnesses/H03-ufield_route_resilience/**'
+      - 'harnesses/ufield_comms_harnesses/H01-ufield_comms_unit/**'
+      - 'harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge/**'
+      - 'missions/ufield_comms_missions/ufield_comms_unit/**'
   push:
     branches: [main]
     paths:
       - '.github/workflows/opregion.yml'
       - 'CMakeLists.txt'
-      - 'tests/cpp/**'
-      - 'tests/test_ci_cpp_test_targets.py'
+      - 'tests/**'
       - 'scripts/**'
       - 'config/harness_targets.json'
       - 'harnesses/opregion_harnesses/**'
+      - 'harnesses/**/zlaunch.sh'
       - 'missions/opregion_missions/**'
+      - 'harnesses/ufield_comms_harnesses/H03-ufield_route_resilience/**'
+      - 'harnesses/ufield_comms_harnesses/H01-ufield_comms_unit/**'
+      - 'harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge/**'
+      - 'missions/ufield_comms_missions/ufield_comms_unit/**'
   workflow_dispatch:
     inputs:
       upstream_ref:
@@ -55,14 +63,17 @@ jobs:
         run: |
           # Tracked results may describe an older local run, not this job.
           rm -f harnesses/opregion_harnesses/H02-opregion_v26/results.txt \
-            harnesses/opregion_harnesses/H01-opregion_safety/results.txt
+            harnesses/opregion_harnesses/H01-opregion_safety/results.txt \
+            harnesses/ufield_comms_harnesses/H03-ufield_route_resilience/results.txt
+          rm -f harnesses/ufield_comms_harnesses/H01-ufield_comms_unit/results.txt \
+            harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge/results.txt
 
       - name: Check out upstream candidate
         uses: actions/checkout@v6
         with:
           repository: moos-ivp/moos-ivp
           # Update this pin only after the required and known-issue contracts run.
-          ref: ${{ inputs.upstream_ref || '3f0928a9712f802d020414e190ed21a1a028d34b' }}
+          ref: ${{ inputs.upstream_ref || '41cd21eecdfc5a7b40c034044d5e96e045b0d05f' }}
           path: moos-ivp
           persist-credentials: false
 
@@ -96,13 +107,28 @@ jobs:
             -DMOOSGeodesy_DIR="$GITHUB_WORKSPACE/moos-ivp/build/MOOS/MOOSGeodesy" \
             -DMOOS_ENABLE_KNOWN_ISSUE_TESTS=ON
           cmake --build build --parallel 2 --target \
-            ctest-family-opregion ctest-family-opregion-known-issues ctest-family-bhvutil
+            ctest-family-opregion ctest-family-opregion-known-issues ctest-family-bhvutil \
+            ctest-family-merged-upstream ctest-family-behaviors-colregs ctest-family-helmivp \
+            ctest-family-geometry ctest-family-mbutil ctest-family-logutils \
+            ctest-family-logstart-known-issues ctest-family-colorpack-known-issues
+
+      - name: Merged upstream CLI and fixture contracts
+        env:
+          NSPATCH_BINARY: ${{ github.workspace }}/moos-ivp/bin/nspatch
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Repository metadata and generated documentation
+        run: |
+          python3 scripts/check_repo_invariants.py
+          python3 scripts/check_cpp_tests.py
+          python3 scripts/generate_context_graph.py --check
 
       - name: Required C++ contracts
         id: required_cpp
         run: |
           python3 scripts/ci_cpp_test_targets.py run --build-dir build \
-            --targets opregion,bhvutil --reports-dir build/opregion-reports \
+            --targets opregion,bhvutil,merged-upstream,behaviors-colregs,helmivp,geometry,mbutil,logutils \
+            --reports-dir build/opregion-reports \
             --summary-path "$GITHUB_STEP_SUMMARY"
 
       - name: Known upstream defects (non-blocking, desired-state assertions)
@@ -111,7 +137,7 @@ jobs:
         continue-on-error: true
         run: |
           python3 scripts/ci_cpp_test_targets.py run --build-dir build \
-            --targets opregion-known-issues --reports-dir build/opregion-reports \
+            --targets opregion-known-issues,logstart-known-issues,colorpack-known-issues --reports-dir build/opregion-reports \
             --summary-path "$GITHUB_STEP_SUMMARY"
 
       - name: V26 mission contracts
@@ -126,19 +152,49 @@ jobs:
         working-directory: cicd/harnesses/opregion_harnesses/H01-opregion_safety
         run: ./zlaunch.sh --jobs=2 --port_base=24000 --keep_workdirs 10
 
+      - name: Runtime shore-route default and opt-in contracts
+        id: broker
+        if: ${{ !cancelled() && steps.required_cpp.outcome == 'success' }}
+        working-directory: cicd/harnesses/ufield_comms_harnesses/H03-ufield_route_resilience
+        run: ./zlaunch.sh --jobs=2 --port_base=26000 --keep_workdirs
+
+      - name: Communication contracts
+        id: comms
+        if: ${{ !cancelled() && steps.required_cpp.outcome == 'success' }}
+        working-directory: cicd/harnesses/ufield_comms_harnesses/H01-ufield_comms_unit
+        run: ./zlaunch.sh --jobs=2 --port_base=20000 --keep_workdirs
+
+      - name: Core broker and keyword-rejection contracts
+        id: core_broker
+        if: ${{ !cancelled() && steps.required_cpp.outcome == 'success' }}
+        working-directory: cicd/harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge
+        # pMediator belongs to moos-ivp-swarm and is tested separately with that dependency.
+        run: ./zlaunch.sh --core_only --jobs=2 --port_base=22000 --keep_workdirs
+
       - name: Summarize known-issue status and mission verdicts
         if: ${{ always() }}
         env:
           KNOWN_OUTCOME: ${{ steps.known.outcome }}
           V26_OUTCOME: ${{ steps.v26.outcome }}
           V24_OUTCOME: ${{ steps.v24.outcome }}
+          BROKER_OUTCOME: ${{ steps.broker.outcome }}
+          COMMS_OUTCOME: ${{ steps.comms.outcome }}
+          CORE_BROKER_OUTCOME: ${{ steps.core_broker.outcome }}
         run: |
+          {
           # shellcheck disable=SC2016
-          printf '\n### Known upstream defects\n\nOutcome: `%s`. These checks do not block the regression gate; a green gate is not a safety release approval. Promote each contract after its upstream fix.\n' "$KNOWN_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
+          printf '\n### Known upstream defects\n\nOutcome: `%s`. These checks do not block the regression gate; a green gate is not a safety release approval. Promote each contract after its upstream fix.\n' "$KNOWN_OUTCOME"
           # shellcheck disable=SC2016
-          printf '\nMission steps: V26 `%s`, V24 `%s`.\n' "$V26_OUTCOME" "$V24_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
-          for harness in H02-opregion_v26 H01-opregion_safety; do
-            report="harnesses/opregion_harnesses/$harness/results.txt"
+          printf '\nGeometry, mbutil, and logutils are required checks. The four OpRegion defects, log-start parser defect, and invalid-color initialization defect are non-blocking.\n'
+          # shellcheck disable=SC2016
+          printf '\nMission steps: V26 `%s`, V24 `%s`, route resilience `%s`, communication `%s`, core broker `%s`.\n' "$V26_OUTCOME" "$V24_OUTCOME" "$BROKER_OUTCOME" "$COMMS_OUTCOME" "$CORE_BROKER_OUTCOME"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for report in harnesses/opregion_harnesses/H02-opregion_v26/results.txt \
+            harnesses/opregion_harnesses/H01-opregion_safety/results.txt \
+            harnesses/ufield_comms_harnesses/H03-ufield_route_resilience/results.txt \
+            harnesses/ufield_comms_harnesses/H01-ufield_comms_unit/results.txt \
+            harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge/results.txt; do
+            harness=$(basename "$(dirname "$report")")
             if [[ -f "$report" ]]; then
               {
                 printf '\n### %s\n\n```text\n' "$harness"
@@ -160,3 +216,9 @@ jobs:
             cicd/build/Testing/Temporary/
             cicd/harnesses/opregion_harnesses/H*/results.txt
             cicd/harnesses/opregion_harnesses/H*/.harness_runs/
+            cicd/harnesses/ufield_comms_harnesses/H03-ufield_route_resilience/results.txt
+            cicd/harnesses/ufield_comms_harnesses/H03-ufield_route_resilience/.harness_runs/
+            cicd/harnesses/ufield_comms_harnesses/H01-ufield_comms_unit/results.txt
+            cicd/harnesses/ufield_comms_harnesses/H01-ufield_comms_unit/.harness_runs/
+            cicd/harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge/results.txt
+            cicd/harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge/.harness_runs/

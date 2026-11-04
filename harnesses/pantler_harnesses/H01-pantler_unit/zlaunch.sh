@@ -312,8 +312,8 @@ apply_case_overlays() {
 
     if [ -n "$CASE_SHORE_PATCH" ]; then
         [ -f "$CASE_SHORE_PATCH" ] || return 1
-        nspatch --stem="$workdir/meta_shoreside.moos" \
-            "$CASE_SHORE_PATCH" --targ="$workdir/meta_shoreside.moosx" || return 1
+        nspatch "$workdir/meta_shoreside.moos" \
+            "$CASE_SHORE_PATCH" "$workdir/meta_shoreside.moosx" || return 1
     fi
 
     if [ "$case_name" = pantler_system_path_launch_pass ]; then

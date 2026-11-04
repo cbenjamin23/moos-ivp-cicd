@@ -140,7 +140,7 @@ endfunction()
 add_subdirectory(geometry)
 add_subdirectory(gen_poly)
 
-# Desired-state checks for acknowledged upstream defects. The OpRegion workflow
+# Desired-state checks for acknowledged upstream defects. The regression workflow
 # enables them and publishes their real failures separately from its required gate.
 option(MOOS_ENABLE_KNOWN_ISSUE_TESTS "Build known upstream defect contracts" OFF)
 if(MOOS_ENABLE_KNOWN_ISSUE_TESTS)

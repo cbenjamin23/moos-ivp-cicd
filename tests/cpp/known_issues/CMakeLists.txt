@@ -18,3 +18,24 @@ add_moos_cpp_test(test_opregion_known_issues
     known_issues
     opregion-known-issues
 )
+
+add_moos_cpp_test(test_logstart_known_issues
+  SOURCES
+    LogStartKnownIssuesTest.cpp
+  LIBS
+    logutils
+    mbutil
+  LABELS
+    known_issues
+    logstart-known-issues
+)
+
+add_moos_cpp_test(test_colorpack_known_issues
+  SOURCES
+    ColorPackKnownIssuesTest.cpp
+  LIBS
+    mbutil
+  LABELS
+    known_issues
+    colorpack-known-issues
+)

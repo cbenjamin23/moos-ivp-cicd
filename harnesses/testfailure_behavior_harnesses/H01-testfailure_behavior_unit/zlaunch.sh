@@ -367,13 +367,13 @@ apply_case_overlays() {
         for patch in "${shore_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_shoreside.moos" \
-            "${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx" || return 1
+        nspatch "$workdir/meta_shoreside.moos" \
+            "${shore_patches[@]}" "$workdir/meta_shoreside.moosx" || return 1
     fi
     if [ -n "$CASE_BHV_PATCH" ]; then
         [ -f "$CASE_BHV_PATCH" ] || return 1
-        nspatch --stem="$workdir/meta_behavior.bhv" \
-            "$CASE_BHV_PATCH" --targ="$workdir/meta_behavior.bhvx" || return 1
+        nspatch "$workdir/meta_behavior.bhv" \
+            "$CASE_BHV_PATCH" "$workdir/meta_behavior.bhvx" || return 1
     fi
 }
 prepare_case() {

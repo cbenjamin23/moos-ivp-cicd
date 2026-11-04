@@ -190,6 +190,11 @@
           "WaypointEngineX"
         ]
       },
+      "colorpack-known-issues": {
+        "path": "tests/cpp/colorpack-known-issues",
+        "source_count": 0,
+        "subareas": []
+      },
       "contacts": {
         "path": "tests/cpp/contacts",
         "source_count": 3,
@@ -249,13 +254,14 @@
       },
       "geometry": {
         "path": "tests/cpp/geometry",
-        "source_count": 32,
+        "source_count": 33,
         "subareas": [
           "AngleUtils",
           "ArcUtils",
           "CPAEngine",
           "CPAPlatform",
           "CPAVariants",
+          "CPXEngines",
           "CircularUtils",
           "Dubins",
           "FieldArtifacts",
@@ -339,6 +345,11 @@
           "LogicCondition"
         ]
       },
+      "logstart-known-issues": {
+        "path": "tests/cpp/logstart-known-issues",
+        "source_count": 0,
+        "subareas": []
+      },
       "logutils": {
         "path": "tests/cpp/logutils",
         "source_count": 5,
@@ -385,6 +396,11 @@
           "UtilityFormats",
           "VarDataPair"
         ]
+      },
+      "merged-upstream": {
+        "path": "tests/cpp/merged-upstream",
+        "source_count": 0,
+        "subareas": []
       },
       "moosgeodesy": {
         "path": "tests/cpp/moosgeodesy",
@@ -617,6 +633,7 @@
       "behaviors-marine",
       "bhvutil",
       "contacts",
+      "colorpack-known-issues",
       "dep_behaviors",
       "encounters",
       "evalutil",
@@ -634,6 +651,7 @@
       "ivpsolve",
       "logic",
       "logutils",
+      "logstart-known-issues",
       "manifest",
       "marine_pid",
       "moosgeodesy",
@@ -643,6 +661,7 @@
       "pnodereporter",
       "marineview",
       "mbutil",
+      "merged-upstream",
       "nspatch",
       "nsplug",
       "obstacles",
@@ -669,7 +688,7 @@
       "zaicview"
     ],
     "path": "tests/cpp",
-    "source_count": 219,
+    "source_count": 222,
     "source_count_by_family": {
       "alogavg": 1,
       "alogbin": 1,
@@ -703,7 +722,7 @@
       "gen_poly": 1,
       "genutil": 2,
       "geodaid": 1,
-      "geometry": 32,
+      "geometry": 33,
       "helmivp": 2,
       "ipfview": 1,
       "isay": 4,
@@ -5729,7 +5748,7 @@
         "path": "missions/ufield_comms_missions/ufield_comms_unit"
       },
       "patches": {
-        "file_count": 19
+        "file_count": 20
       },
       "path": "harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge",
       "perf_profile": "",
@@ -5794,7 +5813,7 @@
         "path": "missions/ufield_comms_missions/ufield_comms_unit"
       },
       "patches": {
-        "file_count": 36
+        "file_count": 38
       },
       "path": "harnesses/ufield_comms_harnesses/H03-ufield_route_resilience",
       "perf_profile": "",
@@ -5812,7 +5831,7 @@
         "uTimerScript"
       ],
       "zlaunch": {
-        "case_count": 25,
+        "case_count": 26,
         "case_parse_error": "",
         "cases": [
           "dead_first_tryhost_blocks_fail",
@@ -5821,6 +5840,7 @@
           "startup_invalid_bad_param_valid_route_pass",
           "startup_ip_route_recover_pass",
           "runtime_tryhost_recover_pass",
+          "runtime_tryhost_default_rejected_pass",
           "runtime_dead_then_valid_blocks_fail",
           "runtime_valid_then_dead_stays_pass",
           "runtime_duplicate_tryhost_ignored_pass",
@@ -7071,7 +7091,7 @@
   "repo": {
     "file_counts_by_suffix": {
       ".bhv": 32,
-      ".cpp": 225,
+      ".cpp": 228,
       ".css": 3,
       ".gif": 1,
       ".h": 13,
@@ -7083,14 +7103,14 @@
       ".moos": 152,
       ".mp4": 149,
       ".png": 4,
-      ".py": 39,
+      ".py": 41,
       ".sh": 361,
-      ".txt": 305,
+      ".txt": 231,
       ".xbhv": 459,
-      ".xmoos": 1359,
+      ".xmoos": 1362,
       "[none]": 6
     },
-    "harness_patch_count": 1714,
+    "harness_patch_count": 1717,
     "harness_target_count": 68,
     "harness_zlaunch_count": 68,
     "mission_config_count": 468,

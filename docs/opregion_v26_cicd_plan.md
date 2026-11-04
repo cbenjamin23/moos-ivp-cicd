@@ -1,136 +1,112 @@
-# OpRegion CI gate and remaining upstream work
+# Upstream regression gate and remaining defects
 
-## Current baseline
+## Reviewed baseline
 
-Reviewed October 5, 2026 against upstream main
-`3f0928a9712f802d020414e190ed21a1a028d34b`.
-The former development branch `aug1926opreg-cpa` was merged in PR #139.
-The original factory admission, metric distance, segment-origin, ETA
-interpolation, and delayed breach flag defects are fixed. Crossing and touching
-segments now correctly have zero CPA.
+The workflow pins official MOOS-IvP main at
+`41cd21eecdfc5a7b40c034044d5e96e045b0d05f`. It includes merged OpRegion fixes
+and subsequent CPX geometry, velocity regulation, helm all-stop, log
+suppression, nspatch, and runtime shore-route changes. Unmerged mission
+reorganization and IvPico proposals are outside this baseline.
 
-The implementation is on `codex/opregion-regression-gate`. GitHub-hosted
-execution remains unverified. The installed MOOS-IvP checkout and binaries were not changed;
-native validation uses an isolated upstream source/build and disposable mission
-copies. Existing MOOS dependency binaries are reused because that source is
-unchanged between the installed revision and this upstream snapshot.
+Manual dispatch can assess another SHA or branch and records the resolved
+commit. Upstream pushes do not automatically trigger this separate repository.
 
-## Implemented regression gate
+## Required CI coverage
 
-[OpRegion workflow](../.github/workflows/opregion.yml) builds headless upstream
-MOOS-IvP on Ubuntu 24.04, then runs these required layers:
+The [regression workflow](../.github/workflows/opregion.yml) builds headless
+upstream on Ubuntu 24.04 and requires:
 
-1. The exact `opregion` CTest label: geometry, static factory admission,
-   ETA-only/CPA-only/combined scoring, and V26 lifecycle/flags.
-2. The full `bhvutil` family, migrated to `CPXEngineOG` and `AOF_ContactX`.
-3. All eight H02 V26 mission cases.
-4. All 27 H01 V24 compatibility cases.
+- All Python contracts, including real nspatch output and dependency preflight.
+- Exact CTest families `opregion`, `bhvutil`, `merged-upstream`,
+  `behaviors-colregs`, `helmivp`, `geometry`, `mbutil`, and `logutils`.
+- Eight V26 and 27 V24 mission cases.
+- All 26 runtime-route cases and all 35 communication cases.
+- The 11 core broker cases, including keyword rejection.
 
-The two former bug-observing H02 sentinels now assert a metric distance and
-the delayed breach flag. No required case succeeds by detecting an old defect.
+The five mission steps run sequentially, with two workers each and explicit
+20000-range port bases: 107 required core cases. Test-family counts overlap
+and must not be summed as unique coverage. Required compilation failures are
+blocking, including compilation of known-defect binaries. Older tracked
+verdicts are removed before running; summaries, JUnit, mission verdicts, and
+case workdirs are retained after failure.
 
-The workflow pins the reviewed upstream SHA. Manual dispatch accepts a branch
-or SHA, records its resolved commit, and assesses it without changing the pin.
-Upstream changes do not automatically trigger this separate repository's
-workflow; use manual dispatch for candidate fixes and update the pin after
-review. There is no scheduled monitor, deployment, or installed-binary update.
+## Compatibility and test corrections
 
-C++ JUnit reports, mission verdicts, and retained case workdirs are uploaded
-even when a test fails. H02 and H01 run sequentially on port bases 22000 and
-24000 with two workers each. Compilation failures are blocking, including
-failures to compile the known-issue target.
+Launchers use positional nspatch stem/patch/target arguments because the pinned
+parser can shadow generic behavior-file flags. Real CLI tests verify sidecar
+contents, vehicle-key filtering, and failure status. Pre-October tools are not
+covered; put the selected upstream tools first in PATH.
 
-## Known issues remain separate and visible
+AOF tests supply the external CPX engine required by the current API. Contracts
+cover stationary contacts, velocity and obstacle-speed regulation, duplicate-log
+suppression, and helm state. GNU linking requires `gen_poly` before geometry;
+the map-image test also compiles upstream `TiffUtils.cpp`.
 
-Configure with `-DMOOS_ENABLE_KNOWN_ISSUE_TESTS=ON` to build four
-desired-state contracts under the exact label `opregion-known-issues`.
-Their workflow step is explicitly non-blocking. They retain genuine failed
-assertions rather than using inverted expectations or CTest `WILL_FAIL`.
-They are excluded by default from an ordinary repository build.
+Geometry/string expectations follow actual helper contracts: inclusive side
+boundaries, the half-turn convention, meaningful winding on non-degenerate
+shapes, compact decimal formatting, current platform summary fields, and
+whitespace trimming. Full-precision numeric assertions remain. The loiter
+fixture tests distinct approaches on either side of a symmetric tie rather
+than depending on math-library rounding to choose a direction.
 
-| Verified defect | Consequence | Suggested upstream solution |
-| --- | --- | --- |
-| CPA-only scoring at one meter from the boundary gives both safe and crossing courses utility 100 | CPA no longer distinguishes a boundary exit at this edge; ETA can still penalize it in combined mode | Keep the adaptive CPA thresholds meaningful at or below one meter; require a crossing course to score below a safe course |
-| Reversed CPA thresholds initialize successfully | A malformed utility interval is accepted | Validate CPA threshold ordering before adapting the thresholds to the current border distance |
-| Both scoring factors can be disabled without an initialization error | The safety objective is built without an active scoring factor | Reject configurations with both ETA and CPA disabled, or explicitly define a no-objective mode |
-| A zero CPA window is accepted by the behavior but rejected by its AOF; initialization then masks the failure | A valid objective is produced using a default instead of the requested window | Reject zero at parsing, or propagate every AOF setter failure through initialization rather than overwriting its result |
+## Broker contracts and dependencies
 
-All four contracts fail against the reviewed revision. Once a fix turns its
-contract green, promote that contract into the required suite. A green
-regression gate is useful engineering evidence, not a claim that V26 is safe
-for every configuration or ready for a safety-critical release.
+The legacy `keyword_mismatch_status_pass` token now grades rejection. The
+mission must observe an incoming broker ping, then require zero enrolled nodes,
+no broker acknowledgement, and no delivered traffic. No attempted connection
+means failure. `pMissionEval` owns the grade.
 
-Additional source-review follow-ups remain outside the four executable
-contracts: repetitive CPA diagnostics, a declared but unimplemented
-`XYSeglr::getDistSegList` member (a separate free function exists), unused
-`lapse_dist` semantics, and restrictive
-beta headers in generalized-polygon sources. These require API/intent or
-licensing clarification and should not be represented as runtime failures
-proven by this matrix.
+Runtime-route/discovery fixtures explicitly enable `accept_try_shore_host`
+where needed. The default-rejection fixture omits it and verifies no route is
+created. No global opt-in is added to the mission stem.
 
-## Local commands
+The full H02 broker matrix has 12 cases. Its mediation case needs the separate
+`pMediator` app from `moos-ivp-swarm`. Live runs check this dependency before
+creating workdirs or launching apps. `--just_make` can generate targets without
+it. `--core_only` explicitly selects the other 11 cases; combining that option
+with an explicit mediation case is rejected. CI runs the core selection;
+extension integration is validated separately with that dependency available.
 
-Build upstream separately, then configure the test workspace with explicit
-paths to its source, MOOS package, and MOOSGeodesy package:
+## Six non-blocking upstream defects
 
-```bash
-cmake -S . -B build/opregion \
-  -DMOOSIVP_SOURCE_TREE_BASE=/path/to/isolated/moos-ivp \
-  -DMOOS_DIR=/path/to/isolated/moos-ivp/build/MOOS/MOOSCore \
-  -DMOOSGeodesy_DIR=/path/to/isolated/moos-ivp/build/MOOS/MOOSGeodesy \
-  -DMOOS_ENABLE_KNOWN_ISSUE_TESTS=ON
-cmake --build build/opregion --parallel 4 --target \
-  ctest-family-opregion ctest-family-bhvutil ctest-family-opregion-known-issues
-python3 scripts/ci_cpp_test_targets.py run --build-dir build/opregion \
-  --targets opregion,bhvutil --reports-dir build/opregion/reports
-python3 scripts/ci_cpp_test_targets.py run --build-dir build/opregion \
-  --targets opregion-known-issues --reports-dir build/opregion/reports
-```
+Enable `MOOS_ENABLE_KNOWN_ISSUE_TESTS`. Labels `opregion-known-issues` and
+`logstart-known-issues`, and `colorpack-known-issues` are disjoint from required families. Their workflow
+step uses `continue-on-error` while preserving real failed assertions; no
+expectation is inverted and no test uses `WILL_FAIL`.
 
-The last command currently exits nonzero by design; do not hide that result.
-An existing build cache configured before the API migration must be reconfigured
-against a compatible upstream checkout. Use separate binary/library output
-directories if other local tests rely on the ordinary workspace outputs.
+| Defect | Upstream correction |
+| --- | --- |
+| CPA-only scoring gives safe and crossing courses full utility one meter from the boundary | Preserve a meaningful scoring interval when adapting thresholds |
+| Reversed CPA thresholds initialize successfully | Validate ordering before adaptation |
+| Both ETA and CPA factors can be disabled while initialization succeeds | Reject this configuration or define an explicit no-scoring mode |
+| A zero CPA window is rejected internally, then silently replaced by defaults | Validate consistently and preserve failed setter results |
+| End-of-line log timestamps leave the parser buffer unterminated | Bound writes and terminate the token before parsing |
+| Invalid color construction leaves status flags uninitialized | Initialize flags on every constructor path before rejecting invalid input |
 
-Put the candidate's `bin/` and `scripts/` first in PATH before mission runs.
-Use disposable copies if existing `results.txt` or logs must be preserved.
-Do not run two scripts using overlapping MOOSDB/pShare port blocks.
+The ordinary file/time-bounds test uses a whitespace-terminated header. The
+separate defect contract retains the bare end-of-line case and a shorter
+parse after a longer timestamp; its precision expectations are not relaxed.
+The invalid-color constructor is exercised separately from ordinary circle
+parsing. The rotated lawnmower containment test uses the shared geometry
+tolerance at the boundary and rejects non-finite coordinates.
+Promote each defect after verifying its upstream fix. A green required job
+does not mean these defects are fixed or approve a safety release.
 
-```bash
-(cd harnesses/opregion_harnesses/H02-opregion_v26 &&
- ./zlaunch.sh --jobs=2 --port_base=22000 --keep_workdirs 10)
-(cd harnesses/opregion_harnesses/H01-opregion_safety &&
- ./zlaunch.sh --jobs=2 --port_base=24000 --keep_workdirs 10)
-```
+## Validation and publication
 
-## Validation and rollout boundary
+Validate the exact proposed tree in a clean checkout. An earlier numeric-sharing
+false alarm came from an old snapshot expecting ten reports while the current
+fixture already expected four. The four-report correction belongs in this
+publication.
 
-Native focused CTests passed 16/16, and the full migrated `bhvutil` family
-passed 103/103. Five AOF tests belong to both selections, so these counts are
-not additive unique-test totals. H02 V26 passed 8/8, H01 V24 passed 27/27,
-and the metric-distance H02 case also passed serially. All 93 Python helper
-tests and repository invariants for 68 harness targets passed. The four
-known-issue contracts remain red and are not included in these pass counts.
+Native validation can run the full C++ suite with GUI dependencies; macOS GUI
+tests need desktop-service access. A fresh Debian container checks headless
+builds and the required C++/Python/mission layers. That does not replace the
+hosted Ubuntu/Ninja/dependency-install/artifact run. The optional broader Docker
+compiler/platform matrix is compile-only.
 
-The workflow passes local Actionlint checks. This does not confirm its fresh
-Ubuntu build, artifact upload, or GitHub-hosted execution; those require an
-actual workflow run after publication. Docker's local daemon is unavailable,
-so no Linux portability result is claimed for this implementation. Retain the
-existing headless build matrix for broader
-compiler/platform checks.
-
-Regenerate documentation and the dependency map after changes to test-family
-metadata or harness wiring:
-
-```bash
-python3 docs/tools/build_pages.py
-python3 scripts/generate_context_graph.py
-python3 scripts/list_harness_targets.py validate
-python3 scripts/generate_context_graph.py --check
-python3 scripts/check_repo_invariants.py
-```
-
-Next: run the hosted workflow through a pull request, review its evidence,
-and promote individual known-issue contracts as upstream fixes
-land. No production deployment or active installation consolidation is part of
-this CI change.
+After metadata or harness changes, regenerate docs and the dependency map and
+run repository/C++ invariants. Stage reviewed CI/test/docs changes while
+preserving unrelated working edits. Push the CI branch and use a pull request
+and hosted gate before merging. CI does not deploy or rebuild an active user
+installation.

@@ -107,8 +107,16 @@ TEST(ArtifactUtilsLawnmowerTest, ObliqueLawnmowerKeepsAllVerticesInPolygon)
   XYPolygon box = makeSurveyBox();
 
   ASSERT_GT(path.size(), 2u);
-  for(unsigned int i = 0; i < path.size(); ++i)
-    EXPECT_TRUE(box.contains(path.get_vx(i), path.get_vy(i)));
+  for(unsigned int i = 0; i < path.size(); ++i) {
+    const double x = path.get_vx(i);
+    const double y = path.get_vy(i);
+    ASSERT_TRUE(std::isfinite(x) && std::isfinite(y));
+    // Rotated intersections can land a few rounding units beyond an edge.
+    // Preserve containment with the shared geometry tolerance, not exact zero.
+    EXPECT_TRUE(box.contains(x, y) || box.dist_to_poly(x, y) <= kGeomTol)
+        << "vertex=" << i << " x=" << x << " y=" << y
+        << " distance_to_boundary=" << box.dist_to_poly(x, y);
+  }
 }
 
 // Covers artifact utils lawnmower behavior: full pattern combines opposite sweeps around center.

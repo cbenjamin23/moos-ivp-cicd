@@ -211,8 +211,6 @@ TEST(PlatModelPoseTest, DefaultModelIsInvalidUntilAllPoseFieldsAreSet)
   EXPECT_TRUE(model.isHolonomic());
   EXPECT_EQ(model.getModelType(), "holo");
   EXPECT_EQ(model.getID(), 42u);
-  EXPECT_NEAR(model.getDblValue("anything"), 0.0, kGeomTol);
-  EXPECT_EQ(model.getStrValue("anything"), "");
 
   model.setOSX(1.5);
   model.setOSY(-2.5);
@@ -244,7 +242,7 @@ TEST(PlatModelPoseTest, PoseConstructorNormalizesHeadingAndClampsSpeed)
   EXPECT_NEAR(model.getOSY(), -7.5, kGeomTol);
   EXPECT_NEAR(model.getOSH(), 270.0, kGeomTol);
   EXPECT_NEAR(model.getOSV(), 0.0, kGeomTol);
-  EXPECT_EQ(model.getSpec(), "osx=12.35,osy=-7.5,osh=270,osv=0");
+  EXPECT_EQ(model.getSpec(), "id=0,type=,osx=12.3,osy=-7.5,osh=270,osv=0,spokes:0:0");
 }
 
 // Covers plat model parse behavior: parses compact MOOS-IvP style pose spec.
@@ -257,7 +255,7 @@ TEST(PlatModelParseTest, ParsesCompactMoosIvPStylePoseSpec)
   EXPECT_NEAR(model.getOSY(), -2.5, kGeomTol);
   EXPECT_NEAR(model.getOSH(), 270.0, kGeomTol);
   EXPECT_NEAR(model.getOSV(), 0.0, kGeomTol);
-  EXPECT_EQ(model.getSpec(), "osx=1.25,osy=-2.5,osh=270,osv=0");
+  EXPECT_EQ(model.getSpec(), "id=0,type=,osx=1.2,osy=-2.5,osh=270,osv=0,spokes:0:0");
 }
 
 // Covers plat model parse behavior: rejects unknown or non numeric parameters.

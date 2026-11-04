@@ -6,25 +6,27 @@
 #include "AOF_R16.h"
 #include "AOF_R17.h"
 #include "ColregsTestUtils.h"
+#include "CPXEngineOG.h"
 
 namespace {
 
 template <typename AOF>
-void configureContactAOF(AOF& aof,
+void configureContactAOF(AOF& aof, CPXEngineOG& engine,
                          double cnx = 80,
                          double cny = 0,
                          double cnh = 270,
                          double cnv = 0)
 {
-  aof.setParam("osx", 0.0);
-  aof.setParam("osy", 0.0);
-  aof.setParam("cnx", cnx);
-  aof.setParam("cny", cny);
-  aof.setParam("cnh", cnh);
-  aof.setParam("cnv", cnv);
-  aof.setParam("collision_distance", 10.0);
-  aof.setParam("all_clear_distance", 60.0);
-  aof.setParam("tol", 120.0);
+  engine.reset(cny, cnx, cnh, cnv, 0, 0);
+  ASSERT_TRUE(aof.setParam("collision_distance", 10.0));
+  ASSERT_TRUE(aof.setParam("all_clear_distance", 60.0));
+  ASSERT_TRUE(aof.setParam("tol", 120.0));
+}
+
+void setOwnshipMotion(CPXEngineOG& engine, double heading, double speed = 0)
+{
+  engine.reset(engine.cny(), engine.cnx(), engine.cnh(), engine.cnv(),
+               engine.osy(), engine.osx(), heading, speed);
 }
 
 }  // namespace
@@ -32,12 +34,14 @@ void configureContactAOF(AOF& aof,
 // Covers colregs AOF behavior: CPA utility increases with safer initial separation.
 TEST(ColregsAOFTest, CPAUtilityIncreasesWithSaferInitialSeparation)
 {
-  AOF_CPA near_aof(makeColregsDomain());
-  configureContactAOF(near_aof, 12, 0, 270, 0);
+  CPXEngineOG near_aof_engine;
+  AOF_CPA near_aof(makeColregsDomain(), &near_aof_engine);
+  configureContactAOF(near_aof, near_aof_engine, 12, 0, 270, 0);
   ASSERT_TRUE(near_aof.initialize());
 
-  AOF_CPA far_aof(makeColregsDomain());
-  configureContactAOF(far_aof, 90, 0, 270, 0);
+  CPXEngineOG far_aof_engine;
+  AOF_CPA far_aof(makeColregsDomain(), &far_aof_engine);
+  configureContactAOF(far_aof, far_aof_engine, 90, 0, 270, 0);
   ASSERT_TRUE(far_aof.initialize());
 
   IvPBox stopped = makeCourseSpeedBox(90, 0);
@@ -48,24 +52,27 @@ TEST(ColregsAOFTest, CPAUtilityIncreasesWithSaferInitialSeparation)
 // Covers colregs AOF behavior: rule ao fs require rule specific parameters.
 TEST(ColregsAOFTest, RuleAOFsRequireRuleSpecificParameters)
 {
-  AOF_R13 overtaking(makeColregsDomain());
-  configureContactAOF(overtaking);
+  CPXEngineOG overtaking_engine;
+  AOF_R13 overtaking(makeColregsDomain(), &overtaking_engine);
+  configureContactAOF(overtaking, overtaking_engine);
   EXPECT_FALSE(overtaking.initialize());
   EXPECT_TRUE(overtaking.setParam("passing_side", "port"));
   EXPECT_FALSE(overtaking.setParam("passing_side", "middle"));
   EXPECT_TRUE(overtaking.initialize());
 
-  AOF_R16 giveway(makeColregsDomain());
-  configureContactAOF(giveway);
-  giveway.setParam("osh", 0.0);
+  CPXEngineOG giveway_engine;
+  AOF_R16 giveway(makeColregsDomain(), &giveway_engine);
+  configureContactAOF(giveway, giveway_engine);
+  setOwnshipMotion(giveway_engine, 0.0);
   EXPECT_FALSE(giveway.initialize());
   EXPECT_TRUE(giveway.setParam("passing_side", "stern"));
   EXPECT_TRUE(giveway.setParam("pts_port_turns_ok", "false"));
   EXPECT_TRUE(giveway.initialize());
 
-  AOF_R17 standon(makeColregsDomain());
-  configureContactAOF(standon);
-  standon.setParam("osh", 0.0);
+  CPXEngineOG standon_engine;
+  AOF_R17 standon(makeColregsDomain(), &standon_engine);
+  configureContactAOF(standon, standon_engine);
+  setOwnshipMotion(standon_engine, 0.0);
   standon.setParam("original_course", 90.0);
   EXPECT_FALSE(standon.initialize());
   standon.setParam("original_speed", 2.0);
@@ -76,9 +83,10 @@ TEST(ColregsAOFTest, RuleAOFsRequireRuleSpecificParameters)
 // Covers colregs AOF behavior: rule17 hold mode rewards original course and speed.
 TEST(ColregsAOFTest, Rule17HoldModeRewardsOriginalCourseAndSpeed)
 {
-  AOF_R17 standon(makeColregsDomain());
-  configureContactAOF(standon);
-  standon.setParam("osh", 90.0);
+  CPXEngineOG standon_engine;
+  AOF_R17 standon(makeColregsDomain(), &standon_engine);
+  configureContactAOF(standon, standon_engine);
+  setOwnshipMotion(standon_engine, 90.0);
   standon.setParam("original_course", 90.0);
   standon.setParam("original_speed", 2.0);
   ASSERT_TRUE(standon.setParam("passing_side", "neither"));
@@ -94,13 +102,15 @@ TEST(ColregsAOFTest, Rule17HoldModeRewardsOriginalCourseAndSpeed)
 // Covers colregs AOF behavior: rule14 and rule16 build evaluable utilities.
 TEST(ColregsAOFTest, Rule14AndRule16BuildEvaluableUtilities)
 {
-  AOF_R14 headon(makeColregsDomain());
-  configureContactAOF(headon, 0, 80, 180, 2);
+  CPXEngineOG headon_engine;
+  AOF_R14 headon(makeColregsDomain(), &headon_engine);
+  configureContactAOF(headon, headon_engine, 0, 80, 180, 2);
   ASSERT_TRUE(headon.initialize());
 
-  AOF_R16 giveway(makeColregsDomain());
-  configureContactAOF(giveway, 80, 0, 270, 2);
-  giveway.setParam("osh", 0.0);
+  CPXEngineOG giveway_engine;
+  AOF_R16 giveway(makeColregsDomain(), &giveway_engine);
+  configureContactAOF(giveway, giveway_engine, 80, 0, 270, 2);
+  setOwnshipMotion(giveway_engine, 0.0);
   ASSERT_TRUE(giveway.setParam("passing_side", "stern"));
   ASSERT_TRUE(giveway.initialize());
 
@@ -112,13 +122,15 @@ TEST(ColregsAOFTest, Rule14AndRule16BuildEvaluableUtilities)
 // Covers colregs AOF behavior: rule13 overtaking passing side is accepted and stopped course is neutral.
 TEST(ColregsAOFTest, Rule13OvertakingPassingSideIsAcceptedAndStoppedCourseIsNeutral)
 {
-  AOF_R13 pass_port(makeColregsDomain());
-  configureContactAOF(pass_port, 0, 80, 0, 1);
+  CPXEngineOG pass_port_engine;
+  AOF_R13 pass_port(makeColregsDomain(), &pass_port_engine);
+  configureContactAOF(pass_port, pass_port_engine, 0, 80, 0, 1);
   ASSERT_TRUE(pass_port.setParam("passing_side", "port"));
   ASSERT_TRUE(pass_port.initialize());
 
-  AOF_R13 pass_starboard(makeColregsDomain());
-  configureContactAOF(pass_starboard, 0, 80, 0, 1);
+  CPXEngineOG pass_starboard_engine;
+  AOF_R13 pass_starboard(makeColregsDomain(), &pass_starboard_engine);
+  configureContactAOF(pass_starboard, pass_starboard_engine, 0, 80, 0, 1);
   ASSERT_TRUE(pass_starboard.setParam("passing_side", "starboard"));
   ASSERT_TRUE(pass_starboard.initialize());
 
@@ -138,15 +150,17 @@ TEST(ColregsAOFTest, Rule13OvertakingPassingSideIsAcceptedAndStoppedCourseIsNeut
 // Covers colregs AOF behavior: rule16 stern passing conservative mode disallows port turns.
 TEST(ColregsAOFTest, Rule16SternPassingConservativeModeDisallowsPortTurns)
 {
-  AOF_R16 default_policy(makeColregsDomain());
-  configureContactAOF(default_policy, 80, 0, 270, 2);
-  default_policy.setParam("osh", 0.0);
+  CPXEngineOG default_policy_engine;
+  AOF_R16 default_policy(makeColregsDomain(), &default_policy_engine);
+  configureContactAOF(default_policy, default_policy_engine, 80, 0, 270, 2);
+  setOwnshipMotion(default_policy_engine, 0.0);
   ASSERT_TRUE(default_policy.setParam("passing_side", "stern"));
   ASSERT_TRUE(default_policy.initialize());
 
-  AOF_R16 conservative_policy(makeColregsDomain());
-  configureContactAOF(conservative_policy, 80, 0, 270, 2);
-  conservative_policy.setParam("osh", 0.0);
+  CPXEngineOG conservative_policy_engine;
+  AOF_R16 conservative_policy(makeColregsDomain(), &conservative_policy_engine);
+  configureContactAOF(conservative_policy, conservative_policy_engine, 80, 0, 270, 2);
+  setOwnshipMotion(conservative_policy_engine, 0.0);
   ASSERT_TRUE(conservative_policy.setParam("passing_side", "stern"));
   ASSERT_TRUE(conservative_policy.setParam("pts_port_turns_ok", "false"));
   ASSERT_TRUE(conservative_policy.initialize());
@@ -163,9 +177,10 @@ TEST(ColregsAOFTest, Rule16SternPassingConservativeModeDisallowsPortTurns)
 // Covers colregs AOF behavior: rule16 bow passing can require minimum bow cross distance.
 TEST(ColregsAOFTest, Rule16BowPassingCanRequireMinimumBowCrossDistance)
 {
-  AOF_R16 bow_policy(makeColregsDomain());
-  configureContactAOF(bow_policy, -80, 0, 90, 1);
-  bow_policy.setParam("osh", 0.0);
+  CPXEngineOG bow_policy_engine;
+  AOF_R16 bow_policy(makeColregsDomain(), &bow_policy_engine);
+  configureContactAOF(bow_policy, bow_policy_engine, -10, 10, 90, 1);
+  setOwnshipMotion(bow_policy_engine, 0.0);
   ASSERT_TRUE(bow_policy.setParam("passing_side", "bow"));
   ASSERT_TRUE(bow_policy.setParam("ok_cn_bow_cross_dist", "20"));
   ASSERT_FALSE(bow_policy.setParam("ok_cn_bow_cross_dist", "-1"));
@@ -174,6 +189,12 @@ TEST(ColregsAOFTest, Rule16BowPassingCanRequireMinimumBowCrossDistance)
   IvPBox close_cross = makeCourseSpeedBox(45, 5);
   IvPBox no_right_turn = makeCourseSpeedBox(315, 2);
 
+  // Prove this is an actual close bow crossing, not a collision or a
+  // mislabeled distant crossing. The former fixture started 80m astern.
+  const double cross_distance = bow_policy_engine.crossesBowDist(45, 5);
+  ASSERT_GT(cross_distance, 0);
+  ASSERT_LE(cross_distance, 20);
+  ASSERT_GT(bow_policy_engine.evalCPA(45, 5, 120), 10);
   EXPECT_DOUBLE_EQ(bow_policy.evalBox(&close_cross), 0);
   EXPECT_GE(bow_policy.evalBox(&no_right_turn), 0);
 }
@@ -181,10 +202,10 @@ TEST(ColregsAOFTest, Rule16BowPassingCanRequireMinimumBowCrossDistance)
 // Covers colregs AOF behavior: rule17 in extremis rejects port turn for contact on port side.
 TEST(ColregsAOFTest, Rule17InExtremisRejectsPortTurnForContactOnPortSide)
 {
-  AOF_R17 standon(makeColregsDomain());
-  configureContactAOF(standon, -40, 80, 180, 2);
-  standon.setParam("osh", 0.0);
-  standon.setParam("osv", 2.0);
+  CPXEngineOG standon_engine;
+  AOF_R17 standon(makeColregsDomain(), &standon_engine);
+  configureContactAOF(standon, standon_engine, -40, 80, 180, 2);
+  setOwnshipMotion(standon_engine, 0.0, 2.0);
   standon.setParam("original_course", 0.0);
   standon.setParam("original_speed", 2.0);
   ASSERT_TRUE(standon.setParam("passing_side", "inextremis"));

@@ -63,7 +63,7 @@ void expectModernAndThinMatch(const Encounter& enc)
   EXPECT_EQ(thin.foreOfContact(), engine.foreOfContact());
   EXPECT_EQ(thin.aftOfContact(), engine.aftOfContact());
   EXPECT_EQ(thin.portOfContact(), engine.portOfContact());
-  EXPECT_EQ(thin.starboardOfContact(), engine.starboardOfContact());
+  EXPECT_EQ(thin.starboardOfContact(), engine.starOfContact());
   EXPECT_EQ(thin.crossesBow(enc.osh, enc.osv),
             engine.crossesBow(enc.osh, enc.osv));
   EXPECT_EQ(thin.crossesStern(enc.osh, enc.osv),
@@ -249,7 +249,7 @@ TEST(CPAModernThinEquivalenceTest, ResetRecomputesCachedGeometry)
   thin.reset(0, 100, 270, 1, 0, 0);
 
   EXPECT_NEAR(thin.getRange(), engine.getRange(), kGeomTol);
-  EXPECT_NEAR(engine.ownshipContactAbsBearing(), 90.0, kGeomTol);
+  EXPECT_NEAR(engine.osToCNAbsBng(), 90.0, kGeomTol);
   EXPECT_TRUE(engine.foreOfContact());
   EXPECT_TRUE(engine.portOfContact());
   EXPECT_NEAR(engine.evalCPA(90, 2, 120), 0.0, kGeomTol);

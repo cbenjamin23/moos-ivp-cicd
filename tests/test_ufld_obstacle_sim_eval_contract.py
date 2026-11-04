@@ -64,7 +64,7 @@ class UfldObstacleSimEvalContractTests(unittest.TestCase):
             self.launcher_text,
         )
         self.assertIn(
-            '"${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx"',
+            '"${shore_patches[@]}" "$workdir/meta_shoreside.moosx"',
             self.launcher_text,
         )
         for legacy_token in (

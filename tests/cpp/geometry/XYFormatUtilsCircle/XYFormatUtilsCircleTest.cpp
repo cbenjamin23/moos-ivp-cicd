@@ -100,7 +100,8 @@ TEST(XYFormatUtilsCircleTest, PreservesParserTreatmentOfUnknownAndLooseFields)
   XYCircle circle = string2Circle(
       "x=1,y=2,radius=-5,source=pContactMgr,type=alert,id=abc,"
       "duration=-7,fill_transparency=2,active=maybe,vertices=0,"
-      "edge_size=-1,vertex_size=-2,edge_color=notacolor");
+      // Invalid color construction is isolated in colorpack-known-issues.
+      "edge_size=-1,vertex_size=-2");
 
   ASSERT_TRUE(circle.valid());
   EXPECT_NEAR(circle.getRad(), 0.0, kGeomTol);

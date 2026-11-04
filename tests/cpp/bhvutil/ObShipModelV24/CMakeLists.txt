@@ -9,4 +9,6 @@ add_moos_cpp_test(test_bhvutil_obshipmodel_v24
     bhvutil
     ObShipModelV24
     BHV_AvoidObstacleV24
+  SUITE_LABELS
+    ObShipSpeedRegulationTest=merged-upstream
 )

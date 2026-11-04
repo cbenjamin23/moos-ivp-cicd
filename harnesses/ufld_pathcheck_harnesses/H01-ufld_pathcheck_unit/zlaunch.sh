@@ -319,10 +319,10 @@ prepare_case() {
         cd "$workdir" || exit 1
         ./clean.sh >/dev/null 2>&1
     ) || return 1
-    nspatch --stem="$workdir/meta_shoreside.moos" \
-        "$COMMON_PATCH" --targ="$workdir/meta_shoreside.common.moos" || return 1
-    nspatch --stem="$workdir/meta_shoreside.common.moos" \
-        "$CASE_PATCH" --targ="$workdir/meta_shoreside.moosx" || return 1
+    nspatch "$workdir/meta_shoreside.moos" \
+        "$COMMON_PATCH" "$workdir/meta_shoreside.common.moos" || return 1
+    nspatch "$workdir/meta_shoreside.common.moos" \
+        "$CASE_PATCH" "$workdir/meta_shoreside.moosx" || return 1
     if [ "$LOG_MODE" = minimal ]; then
         (
             cd "$workdir" || exit 1

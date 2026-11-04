@@ -92,6 +92,12 @@
 
 
         <article class="case-row">
+          <code>direct_host_port_pass</code>
+          <p>Queries QUERY_NUM = 42 using direct --host=localhost --port=N arguments, proving the supplied CLI port reaches the isolated MOOSDB without a mission file; passes when uQueryDB connects and exits 0 before the harness deadline.</p>
+        </article>
+
+
+        <article class="case-row">
           <code>cli_string_pass</code>
           <p>Queries QUERY_STR = ready, testing string equality against the published value; passes when uQueryDB exits 0 within three seconds.</p>
         </article>
@@ -135,13 +141,13 @@
 
         <article class="case-row">
           <code>missing_var_timeout_fail</code>
-          <p>Waits one second for never-published QUERY_MISSING = ready, testing the CLI timeout path; the harness passes when uQueryDB exits 1 after 1.5 to 3.0 seconds of measured process time including connection and shutdown overhead.</p>
+          <p>Waits one second for never-published QUERY_MISSING = ready, testing the CLI timeout path; the harness passes when uQueryDB exits 1 after at least 1.5 seconds of measured process time including connection and shutdown overhead, while the harness deadline remains the upper bound.</p>
         </article>
 
 
         <article class="case-row">
           <code>late_var_wait_pass</code>
-          <p>Starts before QUERY_LATE=arrived is posted at mission time 15, testing that the query remains active for new mail rather than reading an existing DB value; passes when uQueryDB exits 0 after the same 1.5-to-3.0-second measured window.</p>
+          <p>Starts before QUERY_LATE=arrived is posted at mission time 15, testing that the query remains active for new mail rather than reading an existing DB value; passes when uQueryDB exits 0 after at least 1.5 seconds, while the harness deadline remains the upper bound.</p>
         </article>
 
 
@@ -213,7 +219,7 @@
 
         <article class="case-row">
           <code>config_halt_max_time_timeout_fail</code>
-          <p>Generates halt_max_time=1 with the never-satisfied QUERY_MISSING = ready pass condition, testing the configuration alias for the timeout; the harness passes when uQueryDB exits 1 within the same 1.5-to-3.0-second measured process window as CLI --wait=1.</p>
+          <p>Generates halt_max_time=1 with the never-satisfied QUERY_MISSING = ready pass condition, testing the configuration alias for the timeout; the harness passes when uQueryDB exits 1 after the same 1.5-second measured minimum as CLI --wait=1, while the harness deadline remains the upper bound.</p>
         </article>
 
 
@@ -281,8 +287,8 @@
 
     <section class="source-strip">
       <h2>Source links</h2>
-      <a href="https://github.com/cbenjamin23/moos-ivp-cicd-testing/blob/main/harnesses/uquerydb_harnesses/H01-uquerydb_unit/README.md">Harness README</a>
-      <a href="https://github.com/cbenjamin23/moos-ivp-cicd-testing/blob/main/missions/uquerydb_missions/uquerydb_unit/README.md">Mission README</a>
+      <a href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/harnesses/uquerydb_harnesses/H01-uquerydb_unit/README.md">Harness README</a>
+      <a href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/missions/uquerydb_missions/uquerydb_unit/README.md">Mission README</a>
     </section>
   </main>
 

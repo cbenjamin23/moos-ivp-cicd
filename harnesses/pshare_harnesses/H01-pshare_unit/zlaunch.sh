@@ -375,15 +375,15 @@ apply_case_overlays() {
         for patch in "${shore_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_shoreside.moos" \
-            "${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx" || return 1
+        nspatch "$workdir/meta_shoreside.moos" \
+            "${shore_patches[@]}" "$workdir/meta_shoreside.moosx" || return 1
     fi
     if [ "${#peer_patches[@]}" -gt 0 ]; then
         for patch in "${peer_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_peer.moos" \
-            "${peer_patches[@]}" --targ="$workdir/meta_peer.moosx" || return 1
+        nspatch "$workdir/meta_peer.moos" \
+            "${peer_patches[@]}" "$workdir/meta_peer.moosx" || return 1
     fi
 }
 prepare_case() {

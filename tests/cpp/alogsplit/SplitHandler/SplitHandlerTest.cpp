@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <fstream>
 #include <set>
 #include <string>
@@ -48,6 +49,29 @@ bool Contains(const std::string& haystack, const std::string& needle)
 }
 
 }  // namespace
+
+// Duplicate suppression is per variable and only removes identical raw rows:
+// another variable in between does not reset it, but a new timestamp does.
+TEST(AlogSplitHandlerTest, SuppressesIdenticalRowsButPreservesTimeAndValueChanges)
+{
+  TempDir temp("alogsplit_duplicates");
+  const std::string alog = temp.writeFile(
+      "input.alog", WithNewlines({
+          "%% LOGSTART 123.000",
+          "0.000 NAV_X pExampleApp 1", "0.000 NAV_X pExampleApp 1",
+          "0.000 NAV_Y pExampleApp 2", "0.000 NAV_X pExampleApp 1",
+          "1.000 NAV_X pExampleApp 1", "1.000 NAV_X pExampleApp 1",
+          "2.000 NAV_X pExampleApp 2"}));
+  const std::string out_dir = temp.filePath("split_out");
+  SplitHandler handler(alog);
+  handler.setDirectory(out_dir);
+  ASSERT_TRUE(handler.handle());
+  const std::string rows = ReadText(out_dir + "/NAV_X.klog");
+  EXPECT_EQ(std::count(rows.begin(), rows.end(), '\n'), 3);
+  EXPECT_TRUE(Contains(rows, "0.000"));
+  EXPECT_TRUE(Contains(rows, "1.000"));
+  EXPECT_TRUE(Contains(rows, "2.000"));
+}
 
 // Source audit note: app_alogsplit has only a thin main.cpp parser and delegates
 // the real splitting work to lib_logutils SplitHandler. This family therefore

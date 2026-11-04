@@ -4,6 +4,7 @@ set(BEHAVIORS_MARINE_COMMON_LIBS
   helmivp
   logic
   bhvutil
+  gen_poly
   ivpbuild
   ivpcore
   turngeo
@@ -424,7 +425,6 @@ add_moos_cpp_test(test_behaviors_marine_op_region_v26
     OpRegionV26Test.cpp
   LIBS
     ${BEHAVIORS_MARINE_COMMON_LIBS}
-    gen_poly
   LABELS
     behaviors-marine
     opregion

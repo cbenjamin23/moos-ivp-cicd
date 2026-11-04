@@ -705,9 +705,9 @@ prepare_case() {
         ./clean.sh >/dev/null 2>&1
     ) || return 1
     if [ "$LOG_MODE" = full ]; then
-        nspatch --stem="$workdir/meta_shoreside.moos" \
+        nspatch "$workdir/meta_shoreside.moos" \
             "$workdir/full-logging-shoreside.xmoos" \
-            --targ="$workdir/meta_shoreside.moosx" || return 1
+            "$workdir/meta_shoreside.moosx" || return 1
     fi
     get_case_config "$case_name" || return 1
     write_case_files "$workdir"

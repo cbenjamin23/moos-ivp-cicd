@@ -750,7 +750,7 @@ HARNESSES: tuple[Harness, ...] = (
         family="uField Communications",
         path="harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge",
         mission="missions/ufield_comms_missions/ufield_comms_unit",
-        summary="Broker-level uFldNodeBroker/uFldShoreBroker matrix covering handshake acks, qbridge expansion, bridge token expansion, mediated node-message selection, vnode discovery, keyword mismatch status, and auto-bridge suppression.",
+        summary="Broker-level uFldNodeBroker/uFldShoreBroker matrix covering handshake acks, qbridge expansion, bridge token expansion, mediated node-message selection, vnode discovery, keyword rejection, and auto-bridge suppression.",
         proof="Checks node broker pings and acks, `UFSB_NODE_COUNT`, `NODE_PSHARE_VARS`, and exact pShare command evidence for shoreside and vehicle-side bridge setup.",
         gifs=(
             ("Broker Handshake", "broker_handshake_pass", "ufield-broker-handshake.gif"),
@@ -760,6 +760,7 @@ HARNESSES: tuple[Harness, ...] = (
         notes=(
             "This harness reuses the ufield_comms_unit stem and changes broker configuration only through case overlays or small generated mission edits.",
             "The cases intentionally supplement the mission grade with pShare command checks because bridge correctness is expressed as structured broker output.",
+            "Use --core_only for the 11 core cases. The full matrix also requires pMediator from moos-ivp-swarm; missing extension dependencies fail before launch.",
         ),
     ),
     Harness(
@@ -777,6 +778,7 @@ HARNESSES: tuple[Harness, ...] = (
         run="./zlaunch.sh --case=runtime_tryhost_recover_pass --port_base=4000 10",
         notes=(
             "This harness keeps the same static communication stem as H01/H02 but removes or perturbs route setup so broker retry and discovery behavior owns the outcome.",
+            "Runtime-route and vnode-discovery fixtures explicitly enable accept_try_shore_host; the default-rejection case proves unsolicited runtime routes stay disabled.",
             "The cases are intentionally integration-level because route resilience depends on pShare, `uFldNodeBroker`, and `uFldShoreBroker` interacting across separate MOOS communities.",
         ),
     ),

@@ -52,6 +52,7 @@ PSHARE_OFFSET=$((PORT_STRIDE / 2))
 KEEP_WORKDIRS=no
 VERBOSE=no
 JUST_MAKE=no
+CORE_ONLY=no
 LOG_MODE=minimal
 DISPLAY_ARGS=(--nogui)
 CASE=""
@@ -90,6 +91,7 @@ Options:
   --log=<mode>       Logging mode: minimal (default) or full
   --max_time=<secs>  Maximum time passed to each mission wrapper
   --case=<name>      Run one named case
+  --core_only        Run the 11 core cases; omit the pMediator extension case
   --jobs=<n>         Run up to n cases concurrently with rolling scheduling
   --port_base=<n>    Base MOOS port for per-case blocks
   --keep_workdirs    Keep this invocation's isolated case directories
@@ -115,6 +117,7 @@ is_uint() {
 for arg in "$@"; do
     case "$arg" in
         --case=*) CASE="${arg#--case=}" ;;
+        --core_only) CORE_ONLY=yes ;;
         --jobs=*) JOBS="${arg#--jobs=}" ;;
         --port_base=*) PORT_BASE="${arg#--port_base=}" ;;
         --max_time=*) MAX_TIME="${arg#--max_time=}" ;;
@@ -160,13 +163,21 @@ select_cases() {
     if [ -n "$CASE" ]; then
         for case_name in "${CASES[@]}"; do
             if [ "$case_name" = "$CASE" ]; then
+                if [ "$CORE_ONLY" = yes ] && [ "$case_name" = node_mediated_bridge_pass ]; then
+                    die "--core_only excludes node_mediated_bridge_pass; remove --core_only to run it"
+                fi
                 SELECTED_CASES=("$case_name")
                 return 0
             fi
         done
         die "unknown case: $CASE"
     fi
-    SELECTED_CASES=("${CASES[@]}")
+    for case_name in "${CASES[@]}"; do
+        if [ "$CORE_ONLY" = yes ] && [ "$case_name" = node_mediated_bridge_pass ]; then
+            continue
+        fi
+        SELECTED_CASES+=("$case_name")
+    done
     [ "${#SELECTED_CASES[@]}" -gt 0 ] || die "no cases selected"
 }
 
@@ -307,8 +318,7 @@ get_case_config() {
             ;;
         keyword_mismatch_status_pass)
             SHORE_PATCH="$HARNESS_DIR/keyword-mismatch-shoreside.xmoos"
-            EVAL_PATCH="$HARNESS_DIR/normal-summary-eval-shoreside.xmoos"
-            EXTRA_CHECK=keyword_mismatch_status
+            EVAL_PATCH="$HARNESS_DIR/keyword-rejection-eval-shoreside.xmoos"
             ;;
         shore_bridge_tokens_pass)
             SHORE_PATCH="$HARNESS_DIR/shore-bridge-tokens-shoreside.xmoos"
@@ -372,11 +382,11 @@ prepare_case() {
     fi
     [ -z "$SHORE_PATCH" ] || shore_patches+=("$SHORE_PATCH")
     shore_patches+=("$EVAL_PATCH")
-    nspatch --stem="$workdir/meta_shoreside.moos" \
-        "${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx" || return 1
+    nspatch "$workdir/meta_shoreside.moos" \
+        "${shore_patches[@]}" "$workdir/meta_shoreside.moosx" || return 1
     [ -z "$VEHICLE_PATCH" ] || vehicle_patches+=("$VEHICLE_PATCH")
-    nspatch --stem="$workdir/meta_vehicle.moos" \
-        "${vehicle_patches[@]}" --targ="$workdir/meta_vehicle.moosx" || return 1
+    nspatch "$workdir/meta_vehicle.moos" \
+        "${vehicle_patches[@]}" "$workdir/meta_vehicle.moosx" || return 1
     if [ "$LOG_MODE" = minimal ]; then
         (
             cd "$workdir" || exit 1
@@ -464,12 +474,6 @@ supplemental_check_ok() {
         node_custom_bridge)
             vehicle_has "$workdir" ABE PSHARE_CMD 'src_name=CUSTOM_LOCAL,dest_name=CUSTOM_SHARED' &&
             vehicle_has "$workdir" BEN PSHARE_CMD 'src_name=CUSTOM_LOCAL,dest_name=CUSTOM_SHARED'
-            ;;
-        keyword_mismatch_status)
-            shore_has "$workdir" NODE_BROKER_ACK_ABE 'status=keyword_mismatch' &&
-            shore_has "$workdir" NODE_BROKER_ACK_BEN 'status=keyword_mismatch' &&
-            vehicle_has "$workdir" ABE NODE_BROKER_ACK 'status=keyword_mismatch' &&
-            vehicle_has "$workdir" BEN NODE_BROKER_ACK 'status=keyword_mismatch'
             ;;
         shore_bridge_tokens)
             shore_has "$workdir" PSHARE_CMD 'src_name=STATUS_abe,dest_name=STATUS' &&
@@ -711,6 +715,13 @@ aggregate_results() {
 }
 
 select_cases
+if [ "$JUST_MAKE" != yes ]; then
+    for selected_case in "${SELECTED_CASES[@]}"; do
+        if [ "$selected_case" = node_mediated_bridge_pass ] && ! command -v pMediator >/dev/null 2>&1; then
+            die "node_mediated_bridge_pass requires pMediator from moos-ivp-swarm on PATH; build that dependency or use --core_only"
+        fi
+    done
+fi
 total=${#SELECTED_CASES[@]}
 if [ "${DISPLAY_ARGS[0]}" = --gui ] && [ "$total" -ne 1 ]; then
     die "--gui requires one explicit --case"

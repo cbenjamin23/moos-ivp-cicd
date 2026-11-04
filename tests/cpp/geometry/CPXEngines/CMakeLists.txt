@@ -1,0 +1,11 @@
+add_moos_cpp_test(test_geometry_cpx_engines
+  SOURCES
+    CPXEnginesTest.cpp
+  LIBS
+    geometry
+    mbutil
+  LABELS
+    geometry
+    CPXEngines
+    merged-upstream
+)

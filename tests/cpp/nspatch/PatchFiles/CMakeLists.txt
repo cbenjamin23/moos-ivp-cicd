@@ -14,5 +14,6 @@ add_moos_cpp_test(test_nspatch_patch_files
     ${NSPATCH_SRC}
   LABELS
     nspatch
+    merged-upstream
     PatchFiles
 )

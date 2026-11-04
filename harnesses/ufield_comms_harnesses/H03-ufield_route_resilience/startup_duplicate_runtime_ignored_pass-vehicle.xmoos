@@ -1,3 +1,5 @@
+uFldNodeBroker::accept_try_shore_host = true
+
 ProcessConfig = uTimerScript
 {
   AppTick   = 4

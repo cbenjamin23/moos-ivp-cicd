@@ -200,14 +200,14 @@ prepare_case() {
             meta_vehicle.moosx meta_vehicle.bhvx
         shore_stem=meta_shoreside.moos
         if [ "$LOG_MODE" = full ]; then
-            nspatch --stem=meta_shoreside.moos full-logging-shoreside.xmoos \
-                --targ=meta_shoreside.full.moos || exit 1
-            nspatch --stem=meta_vehicle.moos full-logging-vehicle.xmoos \
-                --targ=meta_vehicle.moosx || exit 1
+            nspatch meta_shoreside.moos full-logging-shoreside.xmoos \
+                meta_shoreside.full.moos || exit 1
+            nspatch meta_vehicle.moos full-logging-vehicle.xmoos \
+                meta_vehicle.moosx || exit 1
             shore_stem=meta_shoreside.full.moos
         fi
-        nspatch --stem="$shore_stem" "$SHORE_PATCH" \
-            --targ=meta_shoreside.moosx
+        nspatch "$shore_stem" "$SHORE_PATCH" \
+            meta_shoreside.moosx
     )
 }
 

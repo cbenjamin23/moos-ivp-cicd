@@ -67,6 +67,7 @@ CASES=(
     startup_invalid_bad_param_valid_route_pass
     startup_ip_route_recover_pass
     runtime_tryhost_recover_pass
+    runtime_tryhost_default_rejected_pass
     runtime_dead_then_valid_blocks_fail
     runtime_valid_then_dead_stays_pass
     runtime_duplicate_tryhost_ignored_pass
@@ -323,6 +324,11 @@ get_case_config() {
             VEHICLE_PATCH="$HARNESS_DIR/runtime_tryhost_recover_pass-vehicle.xmoos"
             EXTRA_CHECK=runtime_tryhost_recover
             ;;
+        runtime_tryhost_default_rejected_pass)
+            VEHICLE_PATCH="$HARNESS_DIR/runtime_tryhost_default_rejected_pass-vehicle.xmoos"
+            SHORE_PATCH="$HARNESS_DIR/runtime_tryhost_default_rejected_pass-shoreside.xmoos"
+            EXTRA_CHECK=runtime_tryhost_default_rejected
+            ;;
         runtime_dead_then_valid_blocks_fail)
             VEHICLE_PATCH="$HARNESS_DIR/runtime_dead_then_valid_blocks_fail-vehicle.template.xmoos"
             SHORE_PATCH="$HARNESS_DIR/runtime_dead_then_valid_blocks_fail-shoreside.xmoos"
@@ -460,10 +466,10 @@ prepare_case() {
     vehicle_patches+=("$workdir/full-logging-vehicle.xmoos")
     [ -z "$shore_patch" ] || shore_patches+=("$shore_patch")
     vehicle_patches+=("$vehicle_patch")
-    nspatch --stem="$workdir/meta_shoreside.moos" \
-        "${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx" || return 1
-    nspatch --stem="$workdir/meta_vehicle.moos" \
-        "${vehicle_patches[@]}" --targ="$workdir/meta_vehicle.moosx" || return 1
+    nspatch "$workdir/meta_shoreside.moos" \
+        "${shore_patches[@]}" "$workdir/meta_shoreside.moosx" || return 1
+    nspatch "$workdir/meta_vehicle.moos" \
+        "${vehicle_patches[@]}" "$workdir/meta_vehicle.moosx" || return 1
     if [ "$LOG_MODE" = minimal ]; then
         (
             cd "$workdir" || exit 1
@@ -626,6 +632,14 @@ supplemental_check_ok() {
             vehicle_has "$case_dir" "BEN" "PSHARE_CMD" "route=127.0.0.1:[0-9]+" && \
             vehicle_has "$case_dir" "ABE" "NODE_BROKER_ACK" "status=ok,key=0" && \
             vehicle_has "$case_dir" "BEN" "NODE_BROKER_ACK" "status=ok,key=0"
+            ;;
+        runtime_tryhost_default_rejected)
+            vehicle_has "$case_dir" "ABE" "TRY_SHORE_HOST" "pshare_route=localhost:[0-9]+" && \
+            vehicle_has "$case_dir" "BEN" "TRY_SHORE_HOST" "pshare_route=localhost:[0-9]+" && \
+            vehicle_lacks "$case_dir" "ABE" "PSHARE_CMD" "src_name=NODE_BROKER_PING_" && \
+            vehicle_lacks "$case_dir" "BEN" "PSHARE_CMD" "src_name=NODE_BROKER_PING_" && \
+            vehicle_lacks "$case_dir" "ABE" "NODE_BROKER_ACK" "status=ok" && \
+            vehicle_lacks "$case_dir" "BEN" "NODE_BROKER_ACK" "status=ok"
             ;;
         runtime_tryhost_recover)
             vehicle_has "$case_dir" "ABE" "TRY_SHORE_HOST" "pshare_route=localhost:[0-9]+" && \

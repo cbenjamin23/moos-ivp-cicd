@@ -110,7 +110,7 @@ class CppTestTargetSummaryTests(unittest.TestCase):
     def test_opregion_gate_does_not_select_known_issue_label(self) -> None:
         import re
 
-        for family in ("opregion", "opregion-known-issues", "gen_poly"):
+        for family in ("opregion", "opregion-known-issues", "logstart-known-issues", "colorpack-known-issues", "gen_poly"):
             self.assertEqual(
                 ci_cpp_test_targets.select_targets_for_mode("family_run", family, ""),
                 [family],
@@ -125,9 +125,13 @@ class CppTestTargetSummaryTests(unittest.TestCase):
             root / "known_issues" / "CMakeLists.txt"
         )
         self.assertTrue(targets)
+        required = {"opregion", "bhvutil", "merged-upstream", "behaviors-colregs",
+                    "helmivp", "geometry", "mbutil", "logutils"}
         for target in targets:
-            self.assertIn("opregion-known-issues", target.values("LABELS"))
-            self.assertNotIn("opregion", target.values("LABELS"))
+            labels = set(target.values("LABELS"))
+            self.assertIn("known_issues", labels)
+            self.assertTrue(labels.intersection({"opregion-known-issues", "logstart-known-issues", "colorpack-known-issues"}))
+            self.assertFalse(labels.intersection(required))
             self.assertFalse(target.values("SUITE_LABELS"))
 
     def test_required_opregion_components_keep_their_gate_labels(self) -> None:

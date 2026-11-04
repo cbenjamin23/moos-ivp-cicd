@@ -399,29 +399,29 @@ apply_case_overlays() {
         for patch in "${shore_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_shoreside.moos" \
-            "${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx" || return 1
+        nspatch "$workdir/meta_shoreside.moos" \
+            "${shore_patches[@]}" "$workdir/meta_shoreside.moosx" || return 1
     fi
     if [ "${#alpha_patches[@]}" -gt 0 ]; then
         for patch in "${alpha_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_alpha.moos" \
-            "${alpha_patches[@]}" --targ="$workdir/meta_alpha.moosx" || return 1
+        nspatch "$workdir/meta_alpha.moos" \
+            "${alpha_patches[@]}" "$workdir/meta_alpha.moosx" || return 1
     fi
     if [ "${#bravo_patches[@]}" -gt 0 ]; then
         for patch in "${bravo_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_bravo.moos" \
-            "${bravo_patches[@]}" --targ="$workdir/meta_bravo.moosx" || return 1
+        nspatch "$workdir/meta_bravo.moos" \
+            "${bravo_patches[@]}" "$workdir/meta_bravo.moosx" || return 1
     fi
     if [ "${#relay_patches[@]}" -gt 0 ]; then
         for patch in "${relay_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_relay.moos" \
-            "${relay_patches[@]}" --targ="$workdir/meta_relay.moosx" || return 1
+        nspatch "$workdir/meta_relay.moos" \
+            "${relay_patches[@]}" "$workdir/meta_relay.moosx" || return 1
     fi
 }
 

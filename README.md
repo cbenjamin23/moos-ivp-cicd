@@ -54,8 +54,12 @@ harness directory concurrently because invocations share its top-level
 ## OpRegion CI Gate
 
 The [OpRegion regression workflow](.github/workflows/opregion.yml) adds a
-headless upstream build, focused C++ contracts, the full `bhvutil` family,
-and both V26/V24 mission matrices. It uses a validated upstream SHA by default;
+headless upstream build, required geometry/utility and behavior contracts,
+both V26/V24 mission matrices, and runtime-route default/opt-in coverage.
+It also requires the communication matrix and 11 core broker cases; the full
+broker matrix separately needs `pMediator` from `moos-ivp-swarm`.
+Merged-upstream contracts cover CPX geometry, velocity regulation, log
+deduplication, and nspatch compatibility. It uses a validated upstream SHA by default;
 manual dispatch can assess a candidate branch or SHA. Remaining defects run as
 separate non-blocking desired-state checks, with their failures preserved in
 the job summary and artifacts. See the

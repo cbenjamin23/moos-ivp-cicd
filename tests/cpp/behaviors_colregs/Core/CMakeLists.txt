@@ -20,6 +20,7 @@ add_moos_cpp_test(test_behaviors_colregs_velocity_filter
   LABELS
     behaviors-colregs
     VelocityFilter
+    merged-upstream
     pHelmIvP
 )
 

@@ -1,5 +1,6 @@
 ProcessConfig = uFldNodeBroker
 {
+  accept_try_shore_host = true
   AppTick   = 2
   CommsTick = 2
 

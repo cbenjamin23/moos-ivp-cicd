@@ -1,0 +1,60 @@
+ProcessConfig = uTimerScript
+{
+  AppTick = 4
+  CommsTick = 4
+  time_warp = $(WARP)
+  script_name = shoreside_keyword_rejection
+  reset_max = 0
+  verbose = false
+  event = var=DIRECT_MSG_DELIVERED, val=false, time=0.5
+  event = var=ACK_DELIVERED, val=false, time=0.5
+  event = var=REPORT_ABE_TO_BEN, val=false, time=0.5
+  event = var=REPORT_BEN_TO_ABE, val=false, time=0.5
+  event = var=VIEW_COMMS_PULSE_SEEN, val=false, time=0.5
+  event = var=SHARED_REPORT_SEEN, val=false, time=0.5
+  event = var=KEYWORD_PING_SEEN, val=false, time=0.5
+  event = var=KEYWORD_ACK_SEEN, val=false, time=0.5
+  event = var=MISSION_TIMEOUT, val=false, time=0.5
+  event = var=MISSION_TIMEOUT, val=true, time=3200
+  event = var=MISSION_DONE, val=true, time=2600
+}
+
+ProcessConfig = pMissionEval
+{
+  AppTick = 10
+  CommsTick = 10
+  mailflag = @NODE_BROKER_PING#KEYWORD_PING_SEEN=true
+  mailflag = @NODE_BROKER_ACK_ABE#KEYWORD_ACK_SEEN=true
+  mailflag = @NODE_BROKER_ACK_BEN#KEYWORD_ACK_SEEN=true
+  mailflag = @NODE_MESSAGE_BEN#DIRECT_MSG_DELIVERED=true
+  mailflag = @ACK_MESSAGE_abe#ACK_DELIVERED=true
+  mailflag = @NODE_REPORT_BEN#REPORT_ABE_TO_BEN=true
+  mailflag = @NODE_REPORT_ABE#REPORT_BEN_TO_ABE=true
+  mailflag = @VIEW_COMMS_PULSE#VIEW_COMMS_PULSE_SEEN=true
+  lead_condition = MISSION_DONE = true
+  pass_condition = KEYWORD_PING_SEEN = true
+  pass_condition = KEYWORD_ACK_SEEN = false
+  pass_condition = UFSB_NODE_COUNT = 0
+  pass_condition = DIRECT_MSG_DELIVERED = false
+  pass_condition = ACK_DELIVERED = false
+  pass_condition = REPORT_ABE_TO_BEN = false
+  pass_condition = REPORT_BEN_TO_ABE = false
+  pass_condition = VIEW_COMMS_PULSE_SEEN = false
+  pass_condition = MISSION_TIMEOUT = false
+  result_flag = MISSION_EVALUATED = true
+  pass_flag = SAY_MOOS = pass
+  fail_flag = SAY_MOOS = fail
+  mission_form = ufield_keyword_rejection
+  report_file = results.txt
+  report_column = grade=$[GRADE]
+  report_column = form=$[MISSION_FORM]
+  report_column = ping_seen=$[KEYWORD_PING_SEEN]
+  report_column = broker_ack=$[KEYWORD_ACK_SEEN]
+  report_column = node_count=$[UFSB_NODE_COUNT]
+  report_column = direct=$[DIRECT_MSG_DELIVERED]
+  report_column = ack=$[ACK_DELIVERED]
+  report_column = rpt_ab=$[REPORT_ABE_TO_BEN]
+  report_column = rpt_ba=$[REPORT_BEN_TO_ABE]
+  report_column = pulse=$[VIEW_COMMS_PULSE_SEEN]
+  report_column = timeout=$[MISSION_TIMEOUT]
+}

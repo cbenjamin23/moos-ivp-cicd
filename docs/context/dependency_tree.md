@@ -10,9 +10,9 @@ repo files should be opened next?
 
 - Harness targets: `68`
 - Harness launchers: `68` under `harnesses/**/zlaunch.sh`
-- Harness patch/config files: `1714` under configured targets
+- Harness patch/config files: `1717` under configured targets
 - Mission launch/config files: `468` under `missions/`
-- C++ test sources: `219`
+- C++ test sources: `222`
 
 ## Repo Layers
 
@@ -148,7 +148,7 @@ jq '.cpp_tests.families.mbutil' docs/context/dependency_tree.json
 | `ufld_scope_h01` | `ufld_scope` | `harnesses/ufld_scope_harnesses/H01-ufld_scope_unit/zlaunch.sh` | `missions/ufield_app_missions/ufield_app_unit` | 8 | `uFldScope` | `ufld-scope-unit` |
 | `ufield_comms_h01` | `ufield_comms` | `harnesses/ufield_comms_harnesses/H01-ufield_comms_unit/zlaunch.sh` | `missions/ufield_comms_missions/ufield_comms_unit` | 35 | - | `ufield-comms-unit` |
 | `ufield_comms_h02` | `ufield_comms` | `harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge/zlaunch.sh` | `missions/ufield_comms_missions/ufield_comms_unit` | 12 | `pMediator` | `ufield-broker-bridge` |
-| `ufield_comms_h03` | `ufield_comms` | `harnesses/ufield_comms_harnesses/H03-ufield_route_resilience/zlaunch.sh` | `missions/ufield_comms_missions/ufield_comms_unit` | 25 | - | `ufield-route-resilience` |
+| `ufield_comms_h03` | `ufield_comms` | `harnesses/ufield_comms_harnesses/H03-ufield_route_resilience/zlaunch.sh` | `missions/ufield_comms_missions/ufield_comms_unit` | 26 | - | `ufield-route-resilience` |
 | `ufld_obstacle_sim_h01` | `ufld_obstacle_sim` | `harnesses/ufld_obstacle_sim_harnesses/H01-ufld_obstacle_sim_unit/zlaunch.sh` | `missions/ufld_obstacle_sim_missions/ufld_obstacle_sim_unit` | 49 | `uFldObstacleSim`, `pEchoVar` | `ufld-obstacle-sim-unit` |
 
 ## Shared Mission Stems

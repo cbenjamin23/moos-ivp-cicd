@@ -1,144 +1,131 @@
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include "VelocityFilter.h"
 
-// Covers velocity filter behavior: parses valid config and interpolates by faster vessel.
-TEST(VelocityFilterTest, ParsesValidConfigAndInterpolatesByFasterVessel)
+// The merged filter returns a multiplier in [0,1], not a mix of percentages
+// and fractions. Evaluation speed is ownship plus the configured contact speed.
+TEST(VelocityFilterTest, ParsesCanonicalConfigAndRegulatesCombinedSpeed)
 {
-  VelocityFilter filter = stringToVelocityFilter("min_spd=1,max_spd=5,pct=25");
+  VelocityFilter filter =
+      stringToVelocityFilter("min_spd=1,max_spd=5,max_discount=75");
   ASSERT_TRUE(filter.valid());
   EXPECT_DOUBLE_EQ(filter.getMinSpd(), 1);
   EXPECT_DOUBLE_EQ(filter.getMaxSpd(), 5);
-  EXPECT_DOUBLE_EQ(filter.getMinSpdPct(), 25);
+  EXPECT_DOUBLE_EQ(filter.getMaxDiscount(), 75);
 
-  filter.setSpdOS(0.5);
-  filter.setSpdCN(0.75);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 25);
-
-  filter.setSpdOS(3);
-  filter.setSpdCN(2);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 0.625);
-
-  filter.setSpdOS(2);
-  filter.setSpdCN(5);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 100);
+  ASSERT_TRUE(filter.setSpdCN(0));
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(0.5), 0.25);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(3), 0.625);
+  ASSERT_TRUE(filter.setSpdCN(3));
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(2), 1);
 }
 
-// Covers velocity filter behavior: rejects incomplete inverted or out of range configs.
-TEST(VelocityFilterTest, RejectsIncompleteInvertedOrOutOfRangeConfigs)
+TEST(VelocityFilterTest, RejectsIncompleteMalformedAndOutOfRangeConfigs)
 {
-  EXPECT_FALSE(stringToVelocityFilter("min_spd=5,max_spd=1,pct=50").valid());
-  EXPECT_FALSE(stringToVelocityFilter("min_spd=1,max_spd=5,pct=125").valid());
+  for(const char* spec : {
+      "", "max_spd=5,max_discount=50",
+      "min_spd=fast,max_spd=5,max_discount=50",
+      "min_spd=1,max_spd=5", "min_spd=1,max_spd=5,max_discount=much",
+      "min_spd=1,max_spd=5,max_discount=-25",
+      "min_spd=1,max_spd=5,max_discount=125"}) {
+    EXPECT_FALSE(stringToVelocityFilter(spec).valid()) << spec;
+  }
 }
 
-// Covers velocity filter behavior: defaults invalid and direct setters expose contact speeds.
-TEST(VelocityFilterTest, DefaultsInvalidAndDirectSettersExposeContactSpeeds)
+TEST(VelocityFilterTest, DefaultsInvalidAndRejectedInputsPreserveConfiguration)
 {
   VelocityFilter filter;
   EXPECT_FALSE(filter.valid());
   EXPECT_DOUBLE_EQ(filter.getMinSpd(), -1);
   EXPECT_DOUBLE_EQ(filter.getMaxSpd(), -1);
-  EXPECT_DOUBLE_EQ(filter.getMinSpdPct(), -1);
-  EXPECT_DOUBLE_EQ(filter.getSpdOS(), -1);
-  EXPECT_DOUBLE_EQ(filter.getSpdCN(), -1);
-  EXPECT_EQ(filter.getSpec(), "");
+  EXPECT_DOUBLE_EQ(filter.getMaxDiscount(), -1);
+  EXPECT_DOUBLE_EQ(filter.getSpdCN(), 0);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(0), 1);
 
-  filter.setMinSpd(0);
-  filter.setMaxSpd(4);
-  filter.setMinSpdPct(50);
-  filter.setSpdOS(1.5);
-  filter.setSpdCN(3.0);
-
+  ASSERT_TRUE(filter.setMinSpd(0));
+  ASSERT_TRUE(filter.setMaxSpd(4));
+  ASSERT_TRUE(filter.setMaxDiscount(50));
+  ASSERT_TRUE(filter.setSpdCN(1));
   EXPECT_TRUE(filter.valid());
-  EXPECT_DOUBLE_EQ(filter.getSpdOS(), 1.5);
-  EXPECT_DOUBLE_EQ(filter.getSpdCN(), 3.0);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 0.875);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(2), 0.875);
+
+  EXPECT_FALSE(filter.setMinSpd(-1));
+  EXPECT_FALSE(filter.setMaxSpd(-1));
+  EXPECT_FALSE(filter.setMaxDiscount(-1));
+  EXPECT_FALSE(filter.setMaxDiscount(101));
+  EXPECT_FALSE(filter.setSpdCN(-1));
+  EXPECT_DOUBLE_EQ(filter.getMinSpd(), 0);
+  EXPECT_DOUBLE_EQ(filter.getMaxSpd(), 4);
+  EXPECT_DOUBLE_EQ(filter.getMaxDiscount(), 50);
+  EXPECT_DOUBLE_EQ(filter.getSpdCN(), 1);
 }
 
-// Covers velocity filter behavior: handles boundary speeds used by colregs range filtering.
-TEST(VelocityFilterTest, HandlesBoundarySpeedsUsedByColregsRangeFiltering)
+TEST(VelocityFilterTest, ClampsBoundarySpeedsAndKeepsDiscountInUnitInterval)
 {
-  VelocityFilter filter = stringToVelocityFilter("min_spd=2,max_spd=6,pct=40");
+  VelocityFilter filter =
+      stringToVelocityFilter("min_spd=2,max_spd=6,max_discount=60");
   ASSERT_TRUE(filter.valid());
 
-  filter.setSpdOS(2);
-  filter.setSpdCN(0);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 40);
-
-  filter.setSpdOS(1.99);
-  filter.setSpdCN(0);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 40);
-
-  filter.setSpdOS(6);
-  filter.setSpdCN(0);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 100);
-
-  filter.setSpdOS(3);
-  filter.setSpdCN(5);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 0.85);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(1.99), 0.4);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(2), 0.4);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(6), 1);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(20), 1);
+  EXPECT_NEAR(filter.spdRegulate(3), 0.55, 1e-12);
+  for(double speed : {0.0, 1.0, 2.0, 4.0, 6.0, 20.0}) {
+    EXPECT_GE(filter.spdRegulate(speed), 0);
+    EXPECT_LE(filter.spdRegulate(speed), 1);
+  }
 }
 
-// Covers velocity filter behavior: equal speed bounds are valid and act as immediate full filter.
-TEST(VelocityFilterTest, EqualSpeedBoundsAreValidAndActAsImmediateFullFilter)
+TEST(VelocityFilterTest, EqualSpeedBoundsAreValidAndApplyNoDiscount)
 {
-  VelocityFilter filter = stringToVelocityFilter("min_spd=3,max_spd=3,pct=25");
+  VelocityFilter filter =
+      stringToVelocityFilter("min_spd=3,max_spd=3,max_discount=75");
   ASSERT_TRUE(filter.valid());
-
-  filter.setSpdOS(0);
-  filter.setSpdCN(2.99);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 25);
-
-  filter.setSpdOS(3);
-  filter.setSpdCN(0);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 100);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(0), 1);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(3), 1);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(9), 1);
 }
 
-// Covers velocity filter behavior: parser ignores unknown fields and uses last duplicate values.
-TEST(VelocityFilterTest, ParserIgnoresUnknownFieldsAndUsesLastDuplicateValues)
+TEST(VelocityFilterTest, DeprecatedPctAliasMatchesCanonicalDiscount)
 {
   VelocityFilter filter =
       stringToVelocityFilter("min_spd=1,ignored=9,max_spd=5,pct=20,pct=60");
   ASSERT_TRUE(filter.valid());
-  EXPECT_DOUBLE_EQ(filter.getMinSpd(), 1);
+  EXPECT_DOUBLE_EQ(filter.getMaxDiscount(), 60);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(3), 0.7);
+  EXPECT_NE(filter.getSpec().find("max_discount=60"), std::string::npos);
+  EXPECT_NE(filter.getSpec().find("enabled=true"), std::string::npos);
+}
+
+TEST(VelocityFilterTest, DisablingRegulationKeepsConfigurationAndCanBeReversed)
+{
+  VelocityFilter filter =
+      stringToVelocityFilter("min_spd=1,max_spd=5,max_discount=75");
+  ASSERT_TRUE(filter.isSpdRegulated());
+  filter.setEnabled(false);
+  EXPECT_TRUE(filter.valid());
+  EXPECT_FALSE(filter.isSpdRegulated());
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(0), 1);
+  EXPECT_NE(filter.getSpec().find("enabled=false"), std::string::npos);
+  filter.setEnabled(true);
+  EXPECT_TRUE(filter.isSpdRegulated());
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(0), 0.25);
+}
+
+TEST(VelocityFilterTest, BoundSettersNormalizePairedRangeAndDiscountEndpoints)
+{
+  VelocityFilter filter;
+  ASSERT_TRUE(filter.setMinSpd(5));
   EXPECT_DOUBLE_EQ(filter.getMaxSpd(), 5);
-  EXPECT_DOUBLE_EQ(filter.getMinSpdPct(), 60);
-
-  filter.setSpdOS(3);
-  filter.setSpdCN(0);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 0.8);
-}
-
-// Covers velocity filter behavior: negative pct is accepted but clamped at runtime.
-TEST(VelocityFilterTest, NegativePctIsAcceptedButClampedAtRuntime)
-{
-  VelocityFilter filter = stringToVelocityFilter("min_spd=1,max_spd=5,pct=-25");
-  ASSERT_TRUE(filter.valid());
-  EXPECT_DOUBLE_EQ(filter.getMinSpdPct(), -25);
-
-  filter.setSpdOS(1);
-  filter.setSpdCN(0);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), -25);
-
-  filter.setSpdOS(2);
-  filter.setSpdCN(0);
-  EXPECT_DOUBLE_EQ(filter.getFilterPct(), 0.0625);
-}
-
-// Covers velocity filter behavior: rejects missing speed fields but pins pct validation quirk.
-TEST(VelocityFilterTest, RejectsMissingSpeedFieldsButPinsPctValidationQuirk)
-{
-  EXPECT_FALSE(stringToVelocityFilter("").valid());
-  EXPECT_FALSE(stringToVelocityFilter("min_spd=1,pct=50").valid());
-  EXPECT_FALSE(stringToVelocityFilter("max_spd=5,pct=50").valid());
-  EXPECT_FALSE(stringToVelocityFilter("min_spd=fast,max_spd=5,pct=50").valid());
-  EXPECT_FALSE(stringToVelocityFilter("min_spd=1,max_spd=fast,pct=50").valid());
-
-  VelocityFilter missing_pct = stringToVelocityFilter("min_spd=1,max_spd=5");
-  EXPECT_TRUE(missing_pct.valid());
-  EXPECT_DOUBLE_EQ(missing_pct.getMinSpdPct(), -1);
-
-  VelocityFilter malformed_pct =
-      stringToVelocityFilter("min_spd=1,max_spd=5,pct=much");
-  EXPECT_TRUE(malformed_pct.valid());
-  EXPECT_DOUBLE_EQ(malformed_pct.getMinSpdPct(), -1);
+  ASSERT_TRUE(filter.setMaxSpd(1));
+  EXPECT_DOUBLE_EQ(filter.getMinSpd(), 1);
+  ASSERT_TRUE(filter.setMaxSpd(5));
+  ASSERT_TRUE(filter.setMaxDiscount(0));
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(1), 1);
+  ASSERT_TRUE(filter.setMaxDiscount(100));
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(1), 0);
+  EXPECT_DOUBLE_EQ(filter.spdRegulate(5), 1);
 }
