@@ -721,6 +721,7 @@ if [ "$JUST_MAKE" != yes ]; then
             die "node_mediated_bridge_pass requires pMediator from moos-ivp-swarm on PATH; build that dependency or use --core_only"
         fi
     done
+    command -v rg >/dev/null 2>&1 || die "live broker checks require ripgrep (rg) on PATH"
 fi
 total=${#SELECTED_CASES[@]}
 if [ "${DISPLAY_ARGS[0]}" = --gui ] && [ "$total" -ne 1 ]; then

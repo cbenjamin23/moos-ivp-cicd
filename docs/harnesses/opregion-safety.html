@@ -170,7 +170,7 @@
 
         <article class="case-row">
           <code>max_depth_breach_fail</code>
-          <p>Sets max_depth=1 and posts NAV_DEPTH=5 once per second from times two through six, testing the numeric maximum-depth comparison; passes only with DEPTH_LIMIT_BREACHED=true, the paired input value 5, and a behavior error before the missing-breach deadline.</p>
+          <p>Sets max_depth=1 and sends USM_RESET=&quot;depth=5&quot; at time two, testing the numeric maximum-depth comparison with the simulator as the sole NAV_DEPTH publisher; passes only with DEPTH_LIMIT_BREACHED=true, the paired requested depth 5, and a behavior error before the missing-breach deadline.</p>
         </article>
 
 

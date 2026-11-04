@@ -10,6 +10,8 @@ alog checks for the specific route mechanism under test.
 Logging defaults to `--log=minimal`, retaining only the broker-ack, pShare,
 and try-host variables required by those supplemental checks. Use
 `--log=full` to restore the original wildcard shore and vehicle loggers.
+Live supplemental log checks require `ripgrep` (`rg`) on PATH. Missing `rg`
+fails preflight before creating a run; `--just_make` does not require it.
 
 On merged upstream revisions from October 2026 onward, runtime shore routes
 are opt-in. Fixtures that intentionally use `TRY_SHORE_HOST`, including shore

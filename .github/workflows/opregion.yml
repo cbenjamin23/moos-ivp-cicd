@@ -88,7 +88,7 @@ jobs:
       - name: Install headless build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build python3 lsof patch
+          sudo apt-get install -y build-essential cmake ninja-build python3 lsof patch ripgrep
 
       - name: Build upstream without GUI
         working-directory: moos-ivp

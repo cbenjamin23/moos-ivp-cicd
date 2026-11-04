@@ -37,6 +37,9 @@ MOOS apps when the dependency is missing. `--just_make` can generate targets
 without the extension. Combining `--core_only` with an explicit mediation
 case is rejected rather than silently omitting the requested case.
 
+Live supplemental log checks also require `ripgrep` (`rg`) on PATH. Missing
+`rg` fails preflight before creating a run; `--just_make` does not require it.
+
 ## Current Matrix
 
 - `broker_handshake_pass` Runs the ordinary Abe and Ben brokers; passes when each vehicle independently logs the exact normal `NODE_PSHARE_VARS` alias set and its `status=ok,key=0` acknowledgement, while shoreside logs both named pings, acknowledgements, and vacks and the ordinary bridged traffic still flows.

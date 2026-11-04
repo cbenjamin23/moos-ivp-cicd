@@ -997,6 +997,9 @@ aggregate_results() {
 }
 
 select_cases
+if [ "$JUST_MAKE" != yes ]; then
+    command -v rg >/dev/null 2>&1 || die "live routing checks require ripgrep (rg) on PATH"
+fi
 total=${#SELECTED_CASES[@]}
 if [ "${DISPLAY_ARGS[0]}" = --gui ] && [ "$total" -ne 1 ]; then
     die "--gui requires one explicit --case"
