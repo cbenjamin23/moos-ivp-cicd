@@ -1,0 +1,27 @@
+ProcessConfig = pMissionEval
+{
+  AppTick   = 4
+  CommsTick = 4
+  mailflag = @BHV_ERROR#BHV_ERROR_SEEN=true
+
+  lead_condition = HALT_REGION_BREACHED = true
+  lead_condition = BHV_ERROR_SEEN = true
+  pass_condition = HALT_REGION_BREACHED = true
+  pass_condition = BHV_ERROR_SEEN = true
+
+  result_flag = MISSION_EVALUATED = true
+  pass_flag   = SAY_MOOS = pass
+  fail_flag   = SAY_MOOS = fail
+  mission_form = opregion_v26_tests
+  mission_mod  = $(MMOD:=stay_in_disabled_breach_pass)
+  report_file   = results.txt
+  prereport_column = expected=breach_with_keepin_disabled
+  report_column = grade=$[GRADE]
+  report_column = form=$[MISSION_FORM]
+  report_column = mmod=$[MMOD]
+  report_column = eval=$[HALT_REGION_BREACHED]
+  report_column = lapsed=$[SAVE_REGION_BREACHED]
+  report_column = breached=$[HALT_REGION_BREACHED]
+  report_column = bhv_error=$[BHV_ERROR_SEEN]
+  report_column = mhash=$[MHASH_SHORT]
+}

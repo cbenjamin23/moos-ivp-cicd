@@ -6,9 +6,7 @@ ProcessConfig = uTimerScript
   condition = DEPLOY = true
 
   event = var=OPREG_DEPTH_INPUT, val=5, time=2
-  event = var=NAV_DEPTH, val=5, time=2
-  event = var=NAV_DEPTH, val=5, time=3
-  event = var=NAV_DEPTH, val=5, time=4
-  event = var=NAV_DEPTH, val=5, time=5
-  event = var=NAV_DEPTH, val=5, time=6
+  // Keep uSimMarineV22 as the only NAV_DEPTH publisher. Direct NAV_DEPTH
+  // injection races with its surface readings on a busy runner.
+  event = var=USM_RESET, val="depth=5", time=2
 }

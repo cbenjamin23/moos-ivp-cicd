@@ -79,6 +79,7 @@ if(TIFF_FOUND AND OpenGL_FOUND)
     SOURCES
       MarineViewCoreTest.cpp
       ${MARINEVIEW_SRC}/BackImg.cpp
+      ${MARINEVIEW_SRC}/TiffUtils.cpp
     LIBS
       geometry
       mbutil

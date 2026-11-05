@@ -1,0 +1,43 @@
+ProcessConfig = pMissionEval
+{
+  AppTick   = 10
+  CommsTick = 10
+
+  mailflag = @NODE_MESSAGE_BEN#DIRECT_MSG_DELIVERED=true
+  mailflag = @ACK_MESSAGE_abe#ACK_DELIVERED=true
+  mailflag = @NODE_REPORT_BEN#REPORT_ABE_TO_BEN=true
+  mailflag = @NODE_REPORT_ABE#REPORT_BEN_TO_ABE=true
+  mailflag = @VIEW_COMMS_PULSE#VIEW_COMMS_PULSE_SEEN=true
+  mailflag = @NODE_REPORT_UNC#SHARED_REPORT_SEEN=true
+
+  lead_condition = MISSION_DONE = true
+  pass_condition = UFSB_NODE_COUNT = 0
+  pass_condition = DIRECT_MSG_DELIVERED = false
+  pass_condition = ACK_DELIVERED = false
+  pass_condition = REPORT_ABE_TO_BEN = false
+  pass_condition = REPORT_BEN_TO_ABE = false
+  pass_condition = SHARED_REPORT_SEEN = false
+  pass_condition = MISSION_TIMEOUT = false
+
+  result_flag = MISSION_EVALUATED = true
+  pass_flag   = SAY_MOOS = pass
+  fail_flag   = SAY_MOOS = fail
+
+  mission_form = ufield_comms_tests
+  mission_mod  = $(MMOD:=route_resilience_expected_negative_pass)
+
+  report_file   = results.txt
+  report_column = grade=$[GRADE]
+  report_column = form=$[MISSION_FORM]
+  report_column = mmod=$[MMOD]
+  report_column = expected=runtime_tryhost_default_rejected
+  report_column = node_count=$[UFSB_NODE_COUNT]
+  report_column = direct=$[DIRECT_MSG_DELIVERED]
+  report_column = ack=$[ACK_DELIVERED]
+  report_column = rpt_ab=$[REPORT_ABE_TO_BEN]
+  report_column = rpt_ba=$[REPORT_BEN_TO_ABE]
+  report_column = pulse=$[VIEW_COMMS_PULSE_SEEN]
+  report_column = shared=$[SHARED_REPORT_SEEN]
+  report_column = timeout=$[MISSION_TIMEOUT]
+  report_column = mhash=$[MHASH_SHORT]
+}

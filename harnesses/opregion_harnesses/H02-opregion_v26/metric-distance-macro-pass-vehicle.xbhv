@@ -1,0 +1,39 @@
+Behavior = BHV_Waypoint
+{
+  name      = transit
+  pwt       = 100
+  condition = MODE == TRANSITING
+  endflag   = ARRIVED = true
+  endflag   = TRANSIT = false
+  endflag   = DESIRED_SPEED = 0
+  perpetual = false
+  speed     = $(STOCK_SPD)
+  capture_line   = true
+  capture_radius = 4
+  slip_radius    = 12
+  points         = 12,-121
+  repeat         = 0
+}
+
+Behavior = BHV_OpRegionV26
+{
+  name      = opreg
+  pwt       = 300
+  condition = MODE == ACTIVE
+
+  core_poly = border={-23,-135:20,-135:20,-107:-23,-107},label=distance_border # poly={-23,-135:20,-135:20,-107:-23,-107},label=distance_cover
+  lapse_dist  = 2
+  breach_dist = 12
+  stay_in_enabled = true
+  get_back_enabled = true
+  min_util_eta = 4
+  max_util_eta = 15
+  trigger_on_poly_entry = false
+  trigger_entry_time = 0
+  trigger_breach_time = 0
+
+  containedx_flag = OPREG_EXEC_TICK=$[ABS_DIST_TO_EXIT]
+  lapsed_flag      = SAVE_REGION_BREACHED=true
+  breached_flag    = HALT_REGION_BREACHED=true
+  visual_hints = border_edge_color=white,cover_fill_color=gray95
+}

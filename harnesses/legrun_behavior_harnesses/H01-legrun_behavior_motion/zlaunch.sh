@@ -435,17 +435,17 @@ apply_case_patches() {
     clear_xfiles
 
     if [ "$CASE_SHORE_PATCH" != "" ]; then
-        nspatch --stem="$SHORE_STEM" "$CASE_SHORE_PATCH" --targ="$SHORE_XFILE"
+        nspatch "$SHORE_STEM" "$CASE_SHORE_PATCH" "$SHORE_XFILE"
     fi
 
     if [ "$LOG_MODE" = full ] && [ "$CASE_VEH_MOOS_FULL_PATCH" != "" ]; then
-        nspatch --stem="$VEHICLE_MOOS_STEM" "$CASE_VEH_MOOS_FULL_PATCH" --targ="$VEHICLE_MOOS_XFILE"
+        nspatch "$VEHICLE_MOOS_STEM" "$CASE_VEH_MOOS_FULL_PATCH" "$VEHICLE_MOOS_XFILE"
     elif [ "$CASE_VEH_MOOS_PATCH" != "" ]; then
-        nspatch --stem="$VEHICLE_MOOS_STEM" "$CASE_VEH_MOOS_PATCH" --targ="$VEHICLE_MOOS_XFILE"
+        nspatch "$VEHICLE_MOOS_STEM" "$CASE_VEH_MOOS_PATCH" "$VEHICLE_MOOS_XFILE"
     fi
 
     if [ "$CASE_VEH_BHV_PATCH" != "" ]; then
-        nspatch --stem="$VEHICLE_BHV_STEM" "$CASE_VEH_BHV_PATCH" --targ="$VEHICLE_BHV_XFILE"
+        nspatch "$VEHICLE_BHV_STEM" "$CASE_VEH_BHV_PATCH" "$VEHICLE_BHV_XFILE"
     fi
 }
 
@@ -473,8 +473,8 @@ apply_case_overlays() {
         for patch in "${shore_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_shoreside.moos" \
-            "${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx" || return 1
+        nspatch "$workdir/meta_shoreside.moos" \
+            "${shore_patches[@]}" "$workdir/meta_shoreside.moosx" || return 1
     fi
     if [ -n "$CASE_VEH_MOOS_PATCH" ] &&
        { [ "$LOG_MODE" != full ] || [ -z "$CASE_VEH_MOOS_FULL_PATCH" ]; }; then
@@ -484,13 +484,13 @@ apply_case_overlays() {
         for patch in "${vehicle_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_vehicle.moos" \
-            "${vehicle_patches[@]}" --targ="$workdir/meta_vehicle.moosx" || return 1
+        nspatch "$workdir/meta_vehicle.moos" \
+            "${vehicle_patches[@]}" "$workdir/meta_vehicle.moosx" || return 1
     fi
     if [ -n "$CASE_VEH_BHV_PATCH" ]; then
         [ -f "$CASE_VEH_BHV_PATCH" ] || return 1
-        nspatch --stem="$workdir/meta_vehicle.bhv" \
-            "$CASE_VEH_BHV_PATCH" --targ="$workdir/meta_vehicle.bhvx" || return 1
+        nspatch "$workdir/meta_vehicle.bhv" \
+            "$CASE_VEH_BHV_PATCH" "$workdir/meta_vehicle.bhvx" || return 1
     fi
 }
 prepare_case() {

@@ -8,5 +8,6 @@ add_moos_cpp_test(test_alogsplit_split_handler
     mbutil
   LABELS
     alogsplit
+    merged-upstream
     SplitHandler
 )

@@ -1,0 +1,13 @@
+add_moos_cpp_test(test_gen_poly
+  SOURCES
+    GenPolygonTest.cpp
+  LIBS
+    gen_poly
+    geometry
+    mbutil
+  LABELS
+    gen_poly
+    opregion
+  SUITE_LABELS
+    XYGenPolygonTest=XYGenPolygon
+)

@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from scripts import ci_cpp_test_targets
+from scripts import check_cpp_tests, ci_cpp_test_targets
 
 
 class CppTestTargetSummaryTests(unittest.TestCase):
@@ -106,6 +106,51 @@ class CppTestTargetSummaryTests(unittest.TestCase):
             ci_cpp_test_targets.exact_label_regex(["foo.bar", "c++"]),
             r"^(foo\.bar|c\+\+)$",
         )
+
+    def test_opregion_gate_does_not_select_known_issue_label(self) -> None:
+        import re
+
+        for family in ("opregion", "opregion-known-issues", "logstart-known-issues", "colorpack-known-issues", "gen_poly"):
+            self.assertEqual(
+                ci_cpp_test_targets.select_targets_for_mode("family_run", family, ""),
+                [family],
+            )
+        gate = re.compile(ci_cpp_test_targets.exact_label_regex(["opregion"]))
+        self.assertIsNotNone(gate.fullmatch("opregion"))
+        self.assertIsNone(gate.fullmatch("opregion-known-issues"))
+
+    def test_known_issue_target_is_not_registered_as_a_required_contract(self) -> None:
+        root = Path(__file__).resolve().parents[1] / "tests" / "cpp"
+        targets = check_cpp_tests.parse_add_moos_cpp_tests(
+            root / "known_issues" / "CMakeLists.txt"
+        )
+        self.assertTrue(targets)
+        required = {"opregion", "bhvutil", "merged-upstream", "behaviors-colregs",
+                    "helmivp", "geometry", "mbutil", "logutils"}
+        for target in targets:
+            labels = set(target.values("LABELS"))
+            self.assertIn("known_issues", labels)
+            self.assertTrue(labels.intersection({"opregion-known-issues", "logstart-known-issues", "colorpack-known-issues"}))
+            self.assertFalse(labels.intersection(required))
+            self.assertFalse(target.values("SUITE_LABELS"))
+
+    def test_required_opregion_components_keep_their_gate_labels(self) -> None:
+        root = Path(__file__).resolve().parents[1] / "tests" / "cpp"
+        for cmake in (
+            "gen_poly/CMakeLists.txt",
+            "bhvutil/OpRegionAOF/CMakeLists.txt",
+            "behaviors_marine/CoreBehaviors/CMakeLists.txt",
+            "helmivp/FactoryPopulation/CMakeLists.txt",
+        ):
+            targets = check_cpp_tests.parse_add_moos_cpp_tests(root / cmake)
+            with self.subTest(cmake=cmake):
+                self.assertTrue(any(
+                    "opregion" in target.values("LABELS") or any(
+                        "opregion" in entry.partition("=")[2].split(",")
+                        for entry in target.values("SUITE_LABELS")
+                    )
+                    for target in targets
+                ))
 
     def test_public_behavior_families_match_cmake_labels(self) -> None:
         self.assertIn("behaviors-marine", ci_cpp_test_targets.CPP_FAMILIES)

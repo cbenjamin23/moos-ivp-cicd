@@ -37,7 +37,7 @@ ProcessConfig = pMissionEval
   pass_condition = REPORT_BEN_TO_ABE = true
   pass_condition = VIEW_COMMS_PULSE_SEEN = true
   pass_condition = SHARED_REPORT_SEEN = true
-  pass_condition = SHARED_REPORT_COUNT = 10
+  pass_condition = SHARED_REPORT_COUNT = 4
   pass_condition = MISSION_TIMEOUT = false
 
   result_flag = MISSION_EVALUATED = true

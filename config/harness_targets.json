@@ -343,6 +343,13 @@
     "families": ["opregion"]
   },
   {
+    "key": "opregion_h02",
+    "path": "harnesses/opregion_harnesses/H02-opregion_v26",
+    "harness": "H02-opregion_v26",
+    "artifact": "manual-opregion-h02-results",
+    "families": ["opregion"]
+  },
+  {
     "key": "p01_obstacle",
     "path": "harnesses/performance_harnesses/P01-obstacle_gauntlet",
     "harness": "P01-obstacle_gauntlet",

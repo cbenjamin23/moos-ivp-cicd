@@ -395,20 +395,20 @@ apply_case_overlays() {
         for patch in "${shore_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_shoreside.moos" \
-            "${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx" || return 1
+        nspatch "$workdir/meta_shoreside.moos" \
+            "${shore_patches[@]}" "$workdir/meta_shoreside.moosx" || return 1
     fi
     if [ "${#vehicle_patches[@]}" -gt 0 ]; then
         for patch in "${vehicle_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_vehicle.moos" \
-            "${vehicle_patches[@]}" --targ="$workdir/meta_vehicle.moosx" || return 1
+        nspatch "$workdir/meta_vehicle.moos" \
+            "${vehicle_patches[@]}" "$workdir/meta_vehicle.moosx" || return 1
     fi
     if [ -n "$CASE_VEH_BHV_PATCH" ]; then
         [ -f "$CASE_VEH_BHV_PATCH" ] || return 1
-        nspatch --stem="$workdir/meta_vehicle.bhv" \
-            "$CASE_VEH_BHV_PATCH" --targ="$workdir/meta_vehicle.bhvx" || return 1
+        nspatch "$workdir/meta_vehicle.bhv" \
+            "$CASE_VEH_BHV_PATCH" "$workdir/meta_vehicle.bhvx" || return 1
     fi
 }
 prepare_case() {

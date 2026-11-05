@@ -34,7 +34,7 @@
       <p class="lede">Tests check individual classes and functions without running a mission. Organized into focused groups dubbed 'component families' for libraries and other source-level logic like mbutil, geometry, contacts, moosgeodesy, etc.</p>
       <div class="hero-actions">
         <a class="button primary" href="#buckets">Browse component families</a>
-        <a class="button secondary" href="https://github.com/cbenjamin23/moos-ivp-cicd-testing/blob/main/tests/cpp/README.md">README</a>
+        <a class="button secondary" href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/tests/cpp/README.md">README</a>
       </div>
     </section>
 
@@ -45,12 +45,12 @@
       </div>
       <div class="stats-grid stats-grid--two">
         <article class="stat-card">
-          <strong>2864</strong>
+          <strong>2888</strong>
           <span>Test Cases</span>
           <p>Individual C++ unit tests covering expected and edge-case behavior.</p>
         </article>
         <article class="stat-card">
-          <strong>72</strong>
+          <strong>74</strong>
           <span>Component Families</span>
           <p>Groups such as behaviors, geometry, utilities, viewers, and IvP tools.</p>
         </article>
@@ -78,8 +78,8 @@
                 <span class="component-key"><code>behaviors_marine</code></span>
                 <span class="component-name">Marine Behaviors</span>
               </th>
-              <td>39</td>
-              <td>240</td>
+              <td>40</td>
+              <td>246</td>
               <td class="ctest-description">Marine behavior implementations such as waypoint, loiter, station keeping, collision avoidance, and obstacle avoidance.</td>
             </tr>
 
@@ -89,8 +89,8 @@
                 <span class="component-key"><code>geometry</code></span>
                 <span class="component-name">Geometry</span>
               </th>
-              <td>31</td>
-              <td>706</td>
+              <td>32</td>
+              <td>708</td>
               <td class="ctest-description">Geometry primitives, parsers, CPA utilities, shape lifecycles, grids, paths, and polygon generation.</td>
             </tr>
 
@@ -111,8 +111,8 @@
                 <span class="component-key"><code>bhvutil</code></span>
                 <span class="component-name">Behavior Utilities</span>
               </th>
-              <td>9</td>
-              <td>98</td>
+              <td>10</td>
+              <td>101</td>
               <td class="ctest-description">Behavior utility engines, AOF helpers, refineries, waypoint/loiter helpers, and fixed-turn support.</td>
             </tr>
 
@@ -180,6 +180,17 @@
               <td>3</td>
               <td>22</td>
               <td class="ctest-description">COLREGS behavior support logic, velocity filtering, AOF helpers, and behavior contracts.</td>
+            </tr>
+
+
+            <tr class="ctest-summary-row">
+              <th>
+                <span class="component-key"><code>known_issues</code></span>
+                <span class="component-name">Known Issues</span>
+              </th>
+              <td>3</td>
+              <td>6</td>
+              <td class="ctest-description">Source-level checks for the Known Issues component group.</td>
             </tr>
 
 
@@ -508,7 +519,7 @@
                 <span class="component-name">ALog Split</span>
               </th>
               <td>1</td>
-              <td>5</td>
+              <td>6</td>
               <td class="ctest-description">ALog split handlers, split-key parsing, output naming, batch behavior, and file prechecks.</td>
             </tr>
 
@@ -554,6 +565,17 @@
               <td>1</td>
               <td>8</td>
               <td class="ctest-description">CPA encounter events and alog-facing encounter records.</td>
+            </tr>
+
+
+            <tr class="ctest-summary-row">
+              <th>
+                <span class="component-key"><code>gen_poly</code></span>
+                <span class="component-name">Gen Poly</span>
+              </th>
+              <td>1</td>
+              <td>6</td>
+              <td class="ctest-description">Source-level checks for the Gen Poly component group.</td>
             </tr>
 
 

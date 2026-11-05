@@ -44,7 +44,10 @@ COMMON_INFRA_APPS = {
 def is_generated_runtime_artifact(path: Path) -> bool:
     """Return true for generated mission logs and harness case-copy trees."""
     runtime_prefixes = (".parallel_", "LOG_", "MOOSLog_", "XLOG_")
-    return path.name == ".LastOpenedMOOSLogDirectory" or any(
+    mission_result = path.name == "results.txt" and any(
+        part in {"harnesses", "missions"} for part in path.parts
+    )
+    return mission_result or path.name == ".LastOpenedMOOSLogDirectory" or any(
         part == ".harness_runs" or part.startswith(runtime_prefixes)
         for part in path.parts
     )

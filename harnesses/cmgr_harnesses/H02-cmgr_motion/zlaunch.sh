@@ -369,8 +369,8 @@ apply_case_overlays() {
         for patch in "${shore_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_shoreside.moos" \
-            "${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx" || return 1
+        nspatch "$workdir/meta_shoreside.moos" \
+            "${shore_patches[@]}" "$workdir/meta_shoreside.moosx" || return 1
     fi
 
     if [ -n "$CASE_VEH_PATCH" ]; then
@@ -380,8 +380,8 @@ apply_case_overlays() {
         for patch in "${vehicle_patches[@]}"; do
             [ -f "$patch" ] || return 1
         done
-        nspatch --stem="$workdir/meta_vehicle.moos" \
-            "${vehicle_patches[@]}" --targ="$workdir/meta_vehicle.moosx" || return 1
+        nspatch "$workdir/meta_vehicle.moos" \
+            "${vehicle_patches[@]}" "$workdir/meta_vehicle.moosx" || return 1
     fi
 }
 

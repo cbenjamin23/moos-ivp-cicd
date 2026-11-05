@@ -7,6 +7,7 @@
 
 #include "BFactoryStatic.h"
 #include "BFactoryDynamic.h"
+#include "BHV_OpRegionV26.h"
 #include "BehaviorSet.h"
 #include "BehaviorSpec.h"
 #include "InfoBuffer.h"
@@ -67,6 +68,7 @@ TEST(BFactoryStaticTest, BuildsKnownStaticBehaviorsOnlyAfterDomainIsConfigured)
   BFactoryStatic factory;
   EXPECT_TRUE(factory.isKnownBehavior("BHV_Waypoint"));
   EXPECT_TRUE(factory.isKnownBehavior("BHV_AvdColregsV22"));
+  EXPECT_TRUE(factory.isKnownBehavior("BHV_OpRegionV26"));
   EXPECT_FALSE(factory.isKnownBehavior("BHV_NotARealBehavior"));
   EXPECT_EQ(factory.newBehavior("BHV_Waypoint"), nullptr);
 
@@ -79,6 +81,12 @@ TEST(BFactoryStaticTest, BuildsKnownStaticBehaviorsOnlyAfterDomainIsConfigured)
   std::unique_ptr<IvPBehavior> colregs(factory.newBehavior("BHV_AvdColregsV22"));
   ASSERT_NE(colregs, nullptr);
   EXPECT_TRUE(colregs->isConstraint());
+
+  // Keep both probes: pHelmIvP gates behavior loading with isKnownBehavior(),
+  // while newBehavior() exercises construction and the lib_gen_poly link.
+  std::unique_ptr<IvPBehavior> opregion_v26(factory.newBehavior("BHV_OpRegionV26"));
+  ASSERT_NE(opregion_v26, nullptr);
+  EXPECT_NE(dynamic_cast<BHV_OpRegionV26*>(opregion_v26.get()), nullptr);
 }
 
 // Covers b factory dynamic behavior: handles empty and non behavior directories without registration.

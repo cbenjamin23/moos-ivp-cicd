@@ -750,7 +750,7 @@ HARNESSES: tuple[Harness, ...] = (
         family="uField Communications",
         path="harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge",
         mission="missions/ufield_comms_missions/ufield_comms_unit",
-        summary="Broker-level uFldNodeBroker/uFldShoreBroker matrix covering handshake acks, qbridge expansion, bridge token expansion, mediated node-message selection, vnode discovery, keyword mismatch status, and auto-bridge suppression.",
+        summary="Broker-level uFldNodeBroker/uFldShoreBroker matrix covering handshake acks, qbridge expansion, bridge token expansion, mediated node-message selection, vnode discovery, keyword rejection, and auto-bridge suppression.",
         proof="Checks node broker pings and acks, `UFSB_NODE_COUNT`, `NODE_PSHARE_VARS`, and exact pShare command evidence for shoreside and vehicle-side bridge setup.",
         gifs=(
             ("Broker Handshake", "broker_handshake_pass", "ufield-broker-handshake.gif"),
@@ -760,6 +760,7 @@ HARNESSES: tuple[Harness, ...] = (
         notes=(
             "This harness reuses the ufield_comms_unit stem and changes broker configuration only through case overlays or small generated mission edits.",
             "The cases intentionally supplement the mission grade with pShare command checks because bridge correctness is expressed as structured broker output.",
+            "Use --core_only for the 11 core cases. The full matrix also requires pMediator from moos-ivp-swarm; missing extension dependencies fail before launch.",
         ),
     ),
     Harness(
@@ -777,6 +778,7 @@ HARNESSES: tuple[Harness, ...] = (
         run="./zlaunch.sh --case=runtime_tryhost_recover_pass --port_base=4000 10",
         notes=(
             "This harness keeps the same static communication stem as H01/H02 but removes or perturbs route setup so broker retry and discovery behavior owns the outcome.",
+            "Runtime-route and vnode-discovery fixtures explicitly enable accept_try_shore_host; the default-rejection case proves unsolicited runtime routes stay disabled.",
             "The cases are intentionally integration-level because route resilience depends on pShare, `uFldNodeBroker`, and `uFldShoreBroker` interacting across separate MOOS communities.",
         ),
     ),
@@ -1142,6 +1144,25 @@ HARNESSES: tuple[Harness, ...] = (
         notes=(
             "This harness isolates the operating-region safety contract around save/halt envelopes and timing gates.",
             "Expected-fail cases prove that true halt, max-time, or configured save-buffer breaches are caught by the mission verdict.",
+        ),
+    ),
+    Harness(
+        slug="opregion-v26",
+        title="H02 OpRegion V26",
+        family="Behavior Correctness",
+        path="harnesses/opregion_harnesses/H02-opregion_v26",
+        mission="missions/opregion_missions/opregion_motion",
+        summary="Moving correctness harness for BHV_OpRegionV26 generalized polygons, active keep-in, recovery, entry gating, and runtime region updates.",
+        proof="Checks convex and non-convex containment, contained-state objective production, lapsed recovery, entry gating, dynamic regions, disabled keep-in, metric distances, and delayed breach flags.",
+        gifs=(
+            ("Convex Keep-In", "convex_contained_keepin_pass", PENDING_GIF),
+            ("Non-Convex Keep-In", "nonconvex_contained_keepin_pass", PENDING_GIF),
+            ("Lapsed Recovery", "lapsed_recovery_pass", PENDING_GIF),
+        ),
+        run="./zlaunch.sh --jobs=2 --port_base=22000 10",
+        notes=(
+            "The static factory admission contract and all eight mission cases assert the corrected upstream behavior.",
+            "Known CPA edge/configuration defects remain visible in a separate non-blocking CTest report; a green mission matrix is not a safety release approval.",
         ),
     ),
     Harness(
@@ -1849,6 +1870,12 @@ FAMILIES: tuple[Family, ...] = (
         slugs=("opregion-safety",),
     ),
     Family(
+        name="BHV_OpRegionV26",
+        label="Generalized Operating Region Behavior",
+        summary="Checks generalized-polygon keep-in objectives, recovery, entry gates, dynamic regions, and V26 integration regressions.",
+        slugs=("opregion-v26",),
+    ),
+    Family(
         name="BHV_Waypoint",
         label="Waypoint Behavior",
         summary="Checks route traversal, capture modes, cycle flags, runtime point updates, status outputs, and invalid route inputs.",
@@ -2048,6 +2075,7 @@ TEST_STYLE: dict[str, str] = {
     "collision-behavior-motion": "Behavior correctness tests for BHV_AvoidCollision. These cases isolate the behavior contract: alert requests, contact information, lifecycle evidence, per-contact outputs, resolution signals, and collision-free transit.",
     "obstacle-behavior-motion": "Behavior correctness tests for BHV_AvoidObstacleV24. These cases isolate the behavior-owned contract for obstacle alert requests, helper flags, lifecycle evidence, resolution signals, and clean transit outcomes.",
     "opregion-safety": "Behavior correctness tests for BHV_OpRegionV24. These cases isolate the operating-region safety contract: save-region warnings, halt-region failures, generated buffers, entry/exit timing gates, reset handling, and runtime polygon updates.",
+    "opregion-v26": "Behavior correctness tests for BHV_OpRegionV26. These cases isolate generalized-polygon parsing, active contained-state keep-in, lapsed recovery, entry gating, runtime region replacement, disabled keep-in, metric distance output, and delayed breach flags.",
     "waypoint-behavior-motion": "Behavior correctness tests for BHV_Waypoint. These cases verify route completion, waypoint-hit and end flags, repeat/cycle behavior, runtime point updates, capture modes, status variables, and invalid route handling.",
     "loiter-behavior-motion": "Behavior correctness tests for BHV_Loiter. These cases verify stable loiter acquisition, polygon input forms, clockwise selection, center updates, speed modes, reports, and malformed polygon/update handling.",
     "stationkeep-behavior-motion": "Behavior correctness tests for BHV_StationKeep. These cases verify station arrival, hold/swing modes, hibernation, radius and speed updates, retargeting, warning recovery, and invalid parameter handling.",
@@ -2098,6 +2126,7 @@ STEM_CONTEXT: dict[str, str] = {
     "collision-behavior-motion": "The stem mission puts one ownship in a compact moving encounter with a synthetic contact. Unlike the app-level contact-manager harnesses, this stem focuses on what BHV_AvoidCollision requests, publishes, and resolves.",
     "obstacle-behavior-motion": "The stem mission runs one ownship through deterministic obstacle layouts with obstacle-manager input held stable. The cases focus on what BHV_AvoidObstacleV24 requests, flags, and resolves.",
     "opregion-safety": "The stem mission keeps one ownship on a compact transit through configured operating-region envelopes. Case overlays reshape save/halt regions or timing parameters so the behavior's safety flags and breach handling can be graded directly.",
+    "opregion-v26": "The harness copies the proven OpRegion motion mission, replaces its behavior stem with one BHV_OpRegionV26 instance, and applies isolated case overlays for generalized borders, convex covers, recovery geometry, runtime updates, and mission-owned regression evidence.",
     "waypoint-behavior-motion": "The stem mission keeps one simulated vehicle on a short waypoint corridor. Case overlays change route shape, capture settings, runtime point updates, or status variables while the mission grades behavior-owned completion evidence.",
     "loiter-behavior-motion": "The stem mission starts one simulated vehicle near a compact loiter area. Case overlays vary polygon geometry, acquisition conditions, center updates, and speed behavior while grading loiter-owned status outputs.",
     "stationkeep-behavior-motion": "The stem mission starts one simulated vehicle near a station point. Case overlays change the station geometry, hibernation settings, runtime retargeting, and speed/radius settings while grading mode and distance outputs.",

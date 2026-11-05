@@ -1,0 +1,7 @@
+ProcessConfig = uTimerScript
+{
+  AppTick   = 2
+  CommsTick = 2
+  condition = DEPLOY = true
+  event = var=OPREGION_CORE_POLY, val="border={-23,-135:-5,-135:-5,-107:-23,-107},label=dynamic_update # poly={-23,-135:-5,-135:-5,-107:-23,-107},label=dynamic_update_cover", time=8
+}

@@ -487,7 +487,8 @@ TEST(XYSegListTest, DetectsSelfCrossingWhenInterpretedAsClosedShape)
 
   EXPECT_TRUE(bowtie.segs_cross());
   EXPECT_TRUE(bowtie.segs_cross(false));
-  EXPECT_FALSE(bowtie.is_clockwise());
+  // A self-intersecting, zero-signed-area bowtie has no unique winding.
+  // Check orientation on the non-degenerate square below.
 
   XYSegList square = string2SegList("pts={0,0:10,0:10,10:0,10}");
   EXPECT_FALSE(square.segs_cross());

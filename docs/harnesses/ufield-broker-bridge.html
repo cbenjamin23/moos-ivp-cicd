@@ -111,7 +111,7 @@
 
         <article class="case-row">
           <code>keyword_mismatch_status_pass</code>
-          <p>Gives the shore broker keyword shoreside_only while the node brokers use their normal handshake; passes when shore and vehicle logs contain status=keyword_mismatch acknowledgements for both Abe and Ben, node count still reaches two, and the ordinary bridge and traffic summaries remain valid.</p>
+          <p>Gives the shore broker keyword shoreside_only while the node brokers use their normal handshake; passes when the mission observes an incoming broker ping but no broker acknowledgement, no enrolled nodes, and no delivered traffic. The legacy case token is retained; an invalid keyword is a refusal rather than an acknowledgement status.</p>
         </article>
 
 
@@ -161,8 +161,8 @@
 
     <section class="source-strip">
       <h2>Source links</h2>
-      <a href="https://github.com/cbenjamin23/moos-ivp-cicd-testing/blob/main/harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge/README.md">Harness README</a>
-      <a href="https://github.com/cbenjamin23/moos-ivp-cicd-testing/blob/main/missions/ufield_comms_missions/ufield_comms_unit/README.md">Mission README</a>
+      <a href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/harnesses/ufield_comms_harnesses/H02-ufield_broker_bridge/README.md">Harness README</a>
+      <a href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/missions/ufield_comms_missions/ufield_comms_unit/README.md">Mission README</a>
     </section>
   </main>
 

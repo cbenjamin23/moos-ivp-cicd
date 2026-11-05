@@ -261,7 +261,7 @@
 
         <article class="case-row">
           <code>shared_node_reports_numeric_pass</code>
-          <p>Configures shared_node_reports=0.6 while each vehicle sends ten reports across fixed 0.4- and 0.8-real-second gaps; passes when the ordinary directed traffic remains available and exactly ten NODE_REPORT_UNC posts are shared from the twenty inputs, proving that the numeric interval throttles reports rather than merely enabling sharing.</p>
+          <p>Configures shared_node_reports=0.6 while each vehicle sends ten reports under the harness&#x27;s default warp 20; passes when the ordinary directed traffic remains available and exactly four NODE_REPORT_UNC posts are shared from the twenty inputs. The local source compares real elapsed time, and the logged default-warp cadence keeps each vehicle&#x27;s first cluster below the 0.6-second threshold before one later report clears it, so two reports per vehicle are expected. This exact count is intentionally tied to the default warp.</p>
         </article>
 
 
@@ -299,8 +299,8 @@
 
     <section class="source-strip">
       <h2>Source links</h2>
-      <a href="https://github.com/cbenjamin23/moos-ivp-cicd-testing/blob/main/harnesses/ufield_comms_harnesses/H01-ufield_comms_unit/README.md">Harness README</a>
-      <a href="https://github.com/cbenjamin23/moos-ivp-cicd-testing/blob/main/missions/ufield_comms_missions/ufield_comms_unit/README.md">Mission README</a>
+      <a href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/harnesses/ufield_comms_harnesses/H01-ufield_comms_unit/README.md">Harness README</a>
+      <a href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/missions/ufield_comms_missions/ufield_comms_unit/README.md">Mission README</a>
     </section>
   </main>
 

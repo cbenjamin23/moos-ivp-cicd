@@ -122,6 +122,12 @@
 
 
         <article class="case-row">
+          <code>runtime_tryhost_default_rejected_pass</code>
+          <p>Posts the same valid runtime route without opting in; passes when the mission reports zero connected nodes and no message, acknowledgement, or cross-node report delivery, while supplemental logs prove both vehicles received the request but emitted no broker-ping route.</p>
+        </article>
+
+
+        <article class="case-row">
           <code>runtime_dead_then_valid_blocks_fail</code>
           <p>Posts a dead runtime route at time 80 and the live route at 220; the expected-negative case passes when both key 0 and key 1 broker-ping routes are emitted but neither vehicle receives an ok acknowledgement, shoreside node count stays zero, and direct, acknowledgement, and report traffic remains absent.</p>
         </article>
@@ -239,8 +245,8 @@
 
     <section class="source-strip">
       <h2>Source links</h2>
-      <a href="https://github.com/cbenjamin23/moos-ivp-cicd-testing/blob/main/harnesses/ufield_comms_harnesses/H03-ufield_route_resilience/README.md">Harness README</a>
-      <a href="https://github.com/cbenjamin23/moos-ivp-cicd-testing/blob/main/missions/ufield_comms_missions/ufield_comms_unit/README.md">Mission README</a>
+      <a href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/harnesses/ufield_comms_harnesses/H03-ufield_route_resilience/README.md">Harness README</a>
+      <a href="https://github.com/cbenjamin23/moos-ivp-cicd/blob/main/missions/ufield_comms_missions/ufield_comms_unit/README.md">Mission README</a>
     </section>
   </main>
 

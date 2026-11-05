@@ -148,7 +148,8 @@ TEST(AngleUtilsOwnshipSideTest, ClassifiesPortAndStarboardForNorthboundOwnship)
   EXPECT_FALSE(ptPortOfOwnship(0, 0, 0, 0, 0));
   EXPECT_FALSE(ptStarOfOwnship(0, 0, 0, 0, 0));
   EXPECT_FALSE(ptPortOfOwnship(0, 0, 0, 0, 10));
-  EXPECT_FALSE(ptStarOfOwnship(0, 0, 0, 0, -10));
+  // The helper includes the 180-degree boundary in the starboard half-plane.
+  EXPECT_TRUE(ptStarOfOwnship(0, 0, 0, 0, -10));
 }
 
 // Covers angle utils ownship side behavior: classifies convex polygons relative to ownship heading.
@@ -179,7 +180,8 @@ TEST(AngleUtilsTurnTest, ClassifiesPortAndStarboardTurnDirection)
   EXPECT_FALSE(portTurn(0, 90));
   EXPECT_FALSE(portTurn(350, 10));
   EXPECT_TRUE(portTurn(10, 350));
-  EXPECT_TRUE(portTurn(0, 180));
+  // An exact half-turn is not classified as a port turn.
+  EXPECT_FALSE(portTurn(0, 180));
 }
 
 // Covers angle utils turn behavior: computes turn gap from immediate turn circle to obstacle line.

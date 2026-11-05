@@ -10,6 +10,14 @@ alog checks for the specific route mechanism under test.
 Logging defaults to `--log=minimal`, retaining only the broker-ack, pShare,
 and try-host variables required by those supplemental checks. Use
 `--log=full` to restore the original wildcard shore and vehicle loggers.
+Live supplemental log checks require `ripgrep` (`rg`) on PATH. Missing `rg`
+fails preflight before creating a run; `--just_make` does not require it.
+
+On merged upstream revisions from October 2026 onward, runtime shore routes
+are opt-in. Fixtures that intentionally use `TRY_SHORE_HOST`, including shore
+vnode discovery, set `accept_try_shore_host = true` in `uFldNodeBroker`.
+The default-rejection fixture deliberately omits this setting; startup-only
+route cases retain the safe default.
 
 Typical runs:
 
@@ -27,6 +35,7 @@ Typical runs:
 - `startup_invalid_bad_param_valid_route_pass` Adds `shore_route=localhost:<reserved-dead-port>` before a valid startup `pshare_route`; passes when each vehicle creates only the live route as key 0, creates no key 1, receives `status=ok,key=0`, and completes ordinary communications.
 - `startup_ip_route_recover_pass` Uses only startup `pshare_route=127.0.0.1:<shore-port>`; passes when both vehicle logs contain numeric-loopback pShare routes and `status=ok,key=0`, followed by the ordinary communications evidence.
 - `runtime_tryhost_recover_pass` Removes startup routing and posts a valid `TRY_SHORE_HOST` at mission time 220 to both vehicles; passes when each logs the runtime mail, creates a key `0` broker-ping route, receives `status=ok,key=0`, and completes ordinary communications.
+- `runtime_tryhost_default_rejected_pass` Posts the same valid runtime route without opting in; passes when the mission reports zero connected nodes and no message, acknowledgement, or cross-node report delivery, while supplemental logs prove both vehicles received the request but emitted no broker-ping route.
 - `runtime_dead_then_valid_blocks_fail` Posts a dead runtime route at time 80 and the live route at 220; the expected-negative case passes when both key `0` and key `1` broker-ping routes are emitted but neither vehicle receives an `ok` acknowledgement, shoreside node count stays zero, and direct, acknowledgement, and report traffic remains absent.
 - `runtime_valid_then_dead_stays_pass` Posts the live route at time 120 and a dead route at 620; passes when the later key `1` route is emitted, both vehicles retain `status=ok,key=0`, and the full ordinary communications mission succeeds.
 - `runtime_duplicate_tryhost_ignored_pass` Posts the same valid route at times 220 and 260 with no startup route; passes when each vehicle creates only key `0`, no key `1` broker-ping command appears, both receive `status=ok,key=0`, and ordinary communications succeed.

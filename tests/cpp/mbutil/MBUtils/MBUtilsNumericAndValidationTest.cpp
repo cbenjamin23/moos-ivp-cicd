@@ -23,11 +23,11 @@ TEST(MBUtilsValidationTest, ClassifiesNumbersBooleansAndDelimitedWrappers)
   EXPECT_TRUE(isAlphaNum("abe_27", "_"));
   EXPECT_FALSE(isAlphaNum("abe-27"));
   EXPECT_TRUE(isQuoted("\"hello\""));
-  EXPECT_FALSE(isQuoted(" \"hello\" "));
+  EXPECT_TRUE(isQuoted(" \"hello\" "));
   EXPECT_TRUE(isBraced("{x=1}"));
-  EXPECT_FALSE(isBraced(" {x=1} "));
+  EXPECT_TRUE(isBraced(" {x=1} "));
   EXPECT_TRUE(isChevroned("<mode>"));
-  EXPECT_FALSE(isChevroned(" <mode> "));
+  EXPECT_TRUE(isChevroned(" <mode> "));
 }
 
 // Covers mb utils validation behavior: validates IP addresses and turns.

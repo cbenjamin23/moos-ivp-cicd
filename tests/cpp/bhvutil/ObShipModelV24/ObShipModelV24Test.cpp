@@ -16,6 +16,23 @@ XYPolygon obstacleAhead()
 
 }  // namespace
 
+TEST(ObShipSpeedRegulationTest, ClampsDiscountOutsideSpeedBandAndHonorsDisable)
+{
+  ObShipModelV24 model;
+  ASSERT_TRUE(model.setSpdRegulation(1, 5, 75));
+  model.enableSpdRegulation(true);
+  ASSERT_TRUE(model.isSpdRegulated());
+  EXPECT_DOUBLE_EQ(model.spdRegulate(0), 0.25);
+  EXPECT_DOUBLE_EQ(model.spdRegulate(1), 0.25);
+  EXPECT_DOUBLE_EQ(model.spdRegulate(3), 0.625);
+  EXPECT_DOUBLE_EQ(model.spdRegulate(5), 1);
+  EXPECT_DOUBLE_EQ(model.spdRegulate(50), 1);
+  EXPECT_FALSE(model.setSpdRegulation(5, 1, 75));
+  EXPECT_DOUBLE_EQ(model.spdRegulate(0), 0.25);
+  model.enableSpdRegulation(false);
+  EXPECT_DOUBLE_EQ(model.spdRegulate(0), 1);
+}
+
 // Covers ObShipModel V24 behavior: stores pose utility and distance configuration with clamps.
 TEST(ObShipModelV24Test, StoresPoseUtilityAndDistanceConfigurationWithClamps)
 {

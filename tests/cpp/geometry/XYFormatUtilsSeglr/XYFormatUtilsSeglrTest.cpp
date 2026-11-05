@@ -175,7 +175,7 @@ TEST(XYSeglrTest, SerializesRayFieldsDrawingHintsAndOptionalCpa)
   seglr.set_vertex_size(3);
 
   std::string spec = seglr.get_spec(2);
-  EXPECT_TRUE(stringContains(spec, "pts={0.25,1.75:10.50,-2.25}"));
+  EXPECT_TRUE(stringContains(spec, "pts={0.25,1.75:10.5,-2.25}"));
   EXPECT_TRUE(stringContains(spec, "ray=42.75"));
   EXPECT_TRUE(stringContains(spec, "label=turn_ray"));
   EXPECT_TRUE(stringContains(spec, "edge_color=yellow"));

@@ -407,13 +407,13 @@ apply_case_overlays() {
     if [ "$LOG_MODE" = full ]; then
         shore_patches+=("$workdir/full-logging-shoreside.xmoos")
         [ -f "$workdir/full-logging-vehicle.xmoos" ] || return 1
-        nspatch --stem="$workdir/meta_vehicle.moos" \
-            "$workdir/full-logging-vehicle.xmoos" --targ="$workdir/meta_vehicle.moosx" || return 1
+        nspatch "$workdir/meta_vehicle.moos" \
+            "$workdir/full-logging-vehicle.xmoos" "$workdir/meta_vehicle.moosx" || return 1
     fi
     shore_patches+=("$SHORE_PATCH")
     for patch in "${shore_patches[@]}"; do [ -f "$patch" ] || return 1; done
-    nspatch --stem="$workdir/meta_shoreside.moos" \
-        "${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx"
+    nspatch "$workdir/meta_shoreside.moos" \
+        "${shore_patches[@]}" "$workdir/meta_shoreside.moosx"
 }
 
 prepare_case() {

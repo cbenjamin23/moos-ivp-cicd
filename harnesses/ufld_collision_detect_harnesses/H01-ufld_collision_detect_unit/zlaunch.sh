@@ -329,8 +329,8 @@ replace_with_normalization_logger() {
         rm -f "$stem_file"
         return 1
     }
-    nspatch --stem="$stem_file" "$NORMALIZATION_LOG_PATCH" \
-        --targ="$target_file" || {
+    nspatch "$stem_file" "$NORMALIZATION_LOG_PATCH" \
+        "$target_file" || {
         rm -f "$stem_file"
         return 1
     }
@@ -350,10 +350,10 @@ prepare_case() {
         cd "$workdir" || exit 1
         ./clean.sh >/dev/null 2>&1
     ) || return 1
-    nspatch --stem="$workdir/meta_shoreside.moos" \
-        "$COMMON_PATCH" --targ="$workdir/meta_shoreside.common.moos" || return 1
-    nspatch --stem="$workdir/meta_shoreside.common.moos" \
-        "$CASE_PATCH" --targ="$workdir/meta_shoreside.moosx" || return 1
+    nspatch "$workdir/meta_shoreside.moos" \
+        "$COMMON_PATCH" "$workdir/meta_shoreside.common.moos" || return 1
+    nspatch "$workdir/meta_shoreside.common.moos" \
+        "$CASE_PATCH" "$workdir/meta_shoreside.moosx" || return 1
     if [ "$LOG_MODE" = minimal ]; then
         if [ "$case_name" = range_normalization_params_pass ]; then
             [ -f "$NORMALIZATION_LOG_PATCH" ] || return 1

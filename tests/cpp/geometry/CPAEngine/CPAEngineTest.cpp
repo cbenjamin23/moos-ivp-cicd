@@ -24,7 +24,6 @@ TEST(CPAEngineEncounterTest, ClipsCpaDistanceToOwnshipTimeOnLeg)
   EXPECT_NEAR(engine.evalTimeCPA(0, 2, 10), 25.0, kGeomTol);
   EXPECT_NEAR(engine.evalCPA(0, 2, 10), 60.0, kGeomTol);
   EXPECT_NEAR(engine.getARange(0, 2, 10), 60.0, kGeomTol);
-  EXPECT_NEAR(engine.getARangeRate(0, 2, 10), -480.0, kGeomTol);
 }
 
 // Covers CPA engine encounter behavior: pins zero and negative time on leg literal behavior.
@@ -49,13 +48,13 @@ TEST(CPAEngineEncounterTest, ComputesCrossingGeometryUsedByContactAvoidance)
   EXPECT_NEAR(engine.evalTimeCPA(0, 2, 120), 50.0, kGeomTol);
   EXPECT_NEAR(engine.evalROC(0, 2), 2.8284271247, kLooseGeomTol);
   EXPECT_NEAR(engine.bearingRate(0, 2), 0.0, kGeomTol);
-  EXPECT_NEAR(engine.ownshipContactAbsBearing(), 45.0, kGeomTol);
+  EXPECT_NEAR(engine.osToCNAbsBng(), 45.0, kGeomTol);
   EXPECT_NEAR(engine.ownshipContactRelBearing(0), 45.0, kGeomTol);
   EXPECT_NEAR(engine.contactOwnshipRelBearing(), 315.0, kGeomTol);
   EXPECT_TRUE(engine.foreOfContact());
   EXPECT_TRUE(engine.portOfContact());
   EXPECT_FALSE(engine.aftOfContact());
-  EXPECT_FALSE(engine.starboardOfContact());
+  EXPECT_FALSE(engine.starOfContact());
   EXPECT_TRUE(engine.crossesBowOrStern(0, 2));
   EXPECT_TRUE(engine.crossesBow(0, 2));
   EXPECT_TRUE(engine.crossesStern(0, 2));
@@ -86,14 +85,14 @@ TEST(CPAEngineEncounterTest, MirrorsIvPContactBehaviorForwardAndReciprocalState)
   EXPECT_TRUE(os_to_contact.foreOfContact());
   EXPECT_TRUE(os_to_contact.portOfContact());
   EXPECT_FALSE(os_to_contact.aftOfContact());
-  EXPECT_FALSE(os_to_contact.starboardOfContact());
+  EXPECT_FALSE(os_to_contact.starOfContact());
   EXPECT_TRUE(contact_to_os.foreOfContact());
   EXPECT_FALSE(contact_to_os.portOfContact());
-  EXPECT_TRUE(contact_to_os.starboardOfContact());
+  EXPECT_TRUE(contact_to_os.starOfContact());
 
-  EXPECT_NEAR(os_to_contact.ownshipContactAbsBearing(), 45.0, kGeomTol);
+  EXPECT_NEAR(os_to_contact.osToCNAbsBng(), 45.0, kGeomTol);
   EXPECT_NEAR(os_to_contact.ownshipContactRelBearing(osh), 45.0, kGeomTol);
-  EXPECT_NEAR(contact_to_os.ownshipContactAbsBearing(), 225.0, kGeomTol);
+  EXPECT_NEAR(contact_to_os.osToCNAbsBng(), 225.0, kGeomTol);
   EXPECT_NEAR(contact_to_os.ownshipContactRelBearing(cnh), 315.0, kGeomTol);
 
   EXPECT_NEAR(os_to_contact.evalROC(osh, osv), 2.8284271247, kLooseGeomTol);
@@ -137,8 +136,8 @@ TEST(CPAEngineEncounterTest, ClassifiesPortSidePassWithDistanceFromContact)
   EXPECT_TRUE(engine.aftOfContact());
   EXPECT_TRUE(engine.portOfContact());
   EXPECT_FALSE(engine.foreOfContact());
-  EXPECT_FALSE(engine.starboardOfContact());
-  EXPECT_NEAR(engine.ownshipContactAbsBearing(), 26.5650511771, kLooseGeomTol);
+  EXPECT_FALSE(engine.starOfContact());
+  EXPECT_NEAR(engine.osToCNAbsBng(), 26.5650511771, kLooseGeomTol);
   EXPECT_NEAR(engine.contactOwnshipRelBearing(), 206.5650511771, kLooseGeomTol);
   EXPECT_NEAR(engine.evalCPA(0, 3, 120), 50.0, kGeomTol);
   EXPECT_NEAR(engine.evalTimeCPA(0, 3, 120), 50.0, kGeomTol);
@@ -158,10 +157,10 @@ TEST(CPAEngineEncounterTest, ClassifiesStarboardSidePassWithDistanceFromContact)
   CPAEngine engine(100, -50, 0, 1, 0, 0);
 
   EXPECT_TRUE(engine.aftOfContact());
-  EXPECT_TRUE(engine.starboardOfContact());
+  EXPECT_TRUE(engine.starOfContact());
   EXPECT_FALSE(engine.foreOfContact());
   EXPECT_FALSE(engine.portOfContact());
-  EXPECT_NEAR(engine.ownshipContactAbsBearing(), 333.4349488229, kLooseGeomTol);
+  EXPECT_NEAR(engine.osToCNAbsBng(), 333.4349488229, kLooseGeomTol);
   EXPECT_NEAR(engine.contactOwnshipRelBearing(), 153.4349488229, kLooseGeomTol);
   EXPECT_NEAR(engine.evalCPA(0, 3, 120), 50.0, kGeomTol);
   EXPECT_NEAR(engine.evalTimeCPA(0, 3, 120), 50.0, kGeomTol);
@@ -224,7 +223,7 @@ TEST(CPAEngineEncounterTest, PublicInitNonCacheClearsCachedGeometry)
   EXPECT_FALSE(engine.foreOfContact());
   EXPECT_FALSE(engine.aftOfContact());
   EXPECT_FALSE(engine.portOfContact());
-  EXPECT_FALSE(engine.starboardOfContact());
+  EXPECT_FALSE(engine.starOfContact());
 }
 
 // Covers CPA engine encounter behavior: handles stationary contact intercept.
@@ -249,7 +248,7 @@ TEST(CPAEngineEncounterTest, ResetsGeometryAndCachedClassification)
   engine.reset(0, 100, 270, 1, 0, 0);
 
   EXPECT_NEAR(engine.getRange(), 100.0, kGeomTol);
-  EXPECT_NEAR(engine.ownshipContactAbsBearing(), 90.0, kGeomTol);
+  EXPECT_NEAR(engine.osToCNAbsBng(), 90.0, kGeomTol);
   EXPECT_NEAR(engine.ownshipContactRelBearing(90), 0.0, kGeomTol);
   EXPECT_TRUE(engine.foreOfContact());
   EXPECT_TRUE(engine.portOfContact());

@@ -8,10 +8,11 @@
 #include "AOF_AvoidCollisionDepth.h"
 #include "AOF_AvoidObstacleV24.h"
 #include "AOF_AvoidWalls.h"
-#include "AOF_Contact.h"
+#include "AOF_ContactX.h"
 #include "AOF_CutRangeCPA.h"
 #include "AOF_Shadow.h"
 #include "AOF_Waypoint.h"
+#include "CPXEngineOG.h"
 #include "IvPBuildTestUtils.h"
 #include "NumericAssertions.h"
 #include "ObShipModelV24.h"
@@ -48,14 +49,8 @@ IvPBox courseSpeedDepthBox(unsigned int course, unsigned int speed, unsigned int
                           static_cast<int>(depth)});
 }
 
-void configureContactAOF(AOF_Contact& aof)
+void configureContactAOF(AOF_ContactX& aof)
 {
-  EXPECT_TRUE(aof.setParam("osx", 0));
-  EXPECT_TRUE(aof.setParam("osy", 0));
-  EXPECT_TRUE(aof.setParam("cnx", 100));
-  EXPECT_TRUE(aof.setParam("cny", 0));
-  EXPECT_TRUE(aof.setParam("cnh", 270));
-  EXPECT_TRUE(aof.setParam("cnv", 1));
   EXPECT_TRUE(aof.setParam("collision_distance", 10));
   EXPECT_TRUE(aof.setParam("all_clear_distance", 40));
   EXPECT_TRUE(aof.setParam("tol", 60));
@@ -176,29 +171,39 @@ TEST(AOFWaypointTest, RejectsMissingDomainVariablesAndRequiredParameters)
   EXPECT_FALSE(missing_desired_speed.initialize());
 }
 
-// Covers AOF contact behavior: initializes CPA engine and reports relative contact geometry.
-TEST(AOFContactTest, InitializesCPAEngineAndReportsRelativeContactGeometry)
+// Covers the replacement contact AOF: validates an externally owned CPX engine
+// and utility parameters. Relative contact geometry now belongs to that engine.
+TEST(AOFContactXTest, ValidatesExternalEngineAndReportsRelativeContactGeometry)
 {
-  AOF_Contact aof(makeCourseSpeedDomain());
+  CPXEngineOG engine(0, 100, 270, 1, 0, 0, 90, 2);
+  AOF_ContactX aof(makeCourseSpeedDomain(), &engine);
+  EXPECT_FALSE(aof.initialize());
   configureContactAOF(aof);
   ASSERT_TRUE(aof.initialize());
 
-  EXPECT_GT(aof.getCNSpeedInOSPos(), 0.0);
-  EXPECT_NEAR(aof.getRangeGamma(), 0.0, kGeomTol);
-  EXPECT_FALSE(aof.aftOfContact());
-  EXPECT_TRUE(aof.portOfContact());
+  EXPECT_GT(engine.cnSpdInOSPos(), 0.0);
+  EXPECT_NEAR(engine.getRangeGamma(), 0.0, kGeomTol);
+  EXPECT_FALSE(engine.aftOfContact());
+  // The legacy port assertion used a point exactly on the bowline; CPX has
+  // different tie handling. Verify port/starboard with off-axis points instead.
+  engine.reset(0, 100, 270, 1, -1, 0, 90, 2);
+  EXPECT_TRUE(engine.portOfContact());
+  EXPECT_FALSE(engine.starOfContact());
+  engine.reset(0, 100, 270, 1, 1, 0, 90, 2);
+  EXPECT_TRUE(engine.starOfContact());
+  EXPECT_FALSE(engine.portOfContact());
   EXPECT_FALSE(aof.setParam("bogus", 5));
 
-  AOF_Contact invalid(makeCourseSpeedDomain());
-  invalid.setOwnshipParams(0, 0);
-  invalid.setContactParams(100, 0, 270, 1);
+  AOF_ContactX invalid(makeCourseSpeedDomain(), nullptr);
+  configureContactAOF(invalid);
   EXPECT_FALSE(invalid.initialize());
 }
 
 // Covers AOF avoid collision behavior: rewards courses that avoid head on CPA.
 TEST(AOFAvoidCollisionTest, RewardsCoursesThatAvoidHeadOnCPA)
 {
-  AOF_AvoidCollision aof(makeCourseSpeedDomain());
+  CPXEngineOG engine(0, 100, 270, 1, 0, 0, 90, 2);
+  AOF_AvoidCollision aof(makeCourseSpeedDomain(), &engine);
   configureContactAOF(aof);
   ASSERT_TRUE(aof.initialize());
 

@@ -5,7 +5,7 @@ ProcessConfig = pMissionEval
 
   mailflag = @BHV_ERROR#BHV_ERROR_SEEN=true
 
-  lead_condition = ((DEPTH_LIMIT_BREACHED = true) and (BHV_ERROR_SEEN = true)) or (TEST_EVAL_READY = true)
+  lead_condition = (((DEPTH_LIMIT_BREACHED = true) and (BHV_ERROR_SEEN = true)) and (OPREG_DEPTH_INPUT = 5)) or (TEST_EVAL_READY = true)
   pass_condition = DEPTH_LIMIT_BREACHED = true
   pass_condition = OPREG_DEPTH_INPUT = 5
   pass_condition = SAVE_REGION_BREACHED = false

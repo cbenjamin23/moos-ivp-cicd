@@ -1,5 +1,6 @@
 add_subdirectory(ExFilterSet)
 add_subdirectory(AOFs)
+add_subdirectory(OpRegionAOF)
 add_subdirectory(Refineries)
 add_subdirectory(FixedTurn)
 add_subdirectory(LegRun)

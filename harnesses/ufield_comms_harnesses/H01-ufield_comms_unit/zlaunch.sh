@@ -431,12 +431,12 @@ prepare_case() {
     [ -z "$SHORE_PATCH" ] || shore_patches+=("$SHORE_PATCH")
     [ -z "$VEHICLE_PATCH" ] || vehicle_patches+=("$VEHICLE_PATCH")
     if [ "${#shore_patches[@]}" -gt 0 ]; then
-        nspatch --stem="$workdir/meta_shoreside.moos" \
-            "${shore_patches[@]}" --targ="$workdir/meta_shoreside.moosx" || return 1
+        nspatch "$workdir/meta_shoreside.moos" \
+            "${shore_patches[@]}" "$workdir/meta_shoreside.moosx" || return 1
     fi
     if [ "${#vehicle_patches[@]}" -gt 0 ]; then
-        nspatch --stem="$workdir/meta_vehicle.moos" \
-            "${vehicle_patches[@]}" --targ="$workdir/meta_vehicle.moosx" || return 1
+        nspatch "$workdir/meta_vehicle.moos" \
+            "${vehicle_patches[@]}" "$workdir/meta_vehicle.moosx" || return 1
     fi
     if [ "$LOG_MODE" = minimal ]; then
         [ -f "$workdir/meta_shoreside.moosx" ] || \

@@ -221,7 +221,9 @@ TEST(LoiterEngineTest, ResetClockwiseBestChoosesTraversalByApproachHeading)
       {30, 10, 90, false},  {30, 10, 180, true},
       {10, 40, 45, true},   {10, 40, 180, false},
       {-20, 10, 0, true},   {-20, 10, 90, false},
-      {-20, -20, 45, false}, {40, -20, 180, true},
+      // Test both sides of the symmetric 45-degree approach. An exact tie
+      // depends on libm rounding rather than a strictly better traversal.
+      {-20, -20, 40, true}, {-20, -20, 50, false}, {40, -20, 180, true},
       {40, 40, 90, true},   {-20, 40, 315, false}};
 
   for(const Case& test_case : cases) {

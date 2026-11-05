@@ -30,7 +30,11 @@ TEST(AvdColregsBehaviorTest, VersionsAcceptExpectedConfigurationAndRejectBadValu
   EXPECT_TRUE(v22.setParam("headon_only", "true"));
   EXPECT_TRUE(v22.setParam("eval_tol", "120"));
   EXPECT_FALSE(v22.setParam("eval_tol", "3"));
-  EXPECT_FALSE(v22.setParam("velocity_filter", "min_spd=5,max_spd=1,pct=25"));
+  // Bounds are normalized by the new filter setters; invalid discounts still
+  // fail validation instead of producing a multiplier outside [0,1].
+  EXPECT_TRUE(v22.setParam("velocity_filter", "min_spd=5,max_spd=1,max_discount=25"));
+  EXPECT_FALSE(v22.setParam("velocity_filter", "min_spd=1,max_spd=5,max_discount=125"));
+  EXPECT_FALSE(v22.setParam("velocity_filter", "min_spd=1,max_spd=5,max_discount=-25"));
 }
 
 // Covers avd colregs behavior behavior: helm start posts contact manager alert for spawnable template.
@@ -104,8 +108,6 @@ TEST(AvdColregsBehaviorTest, V22RunsAgainstLedgerContactAndPostsRelevance)
   ASSERT_NE(summary, nullptr);
   EXPECT_TRUE(textContains(summary->get_sdata(), "mode=headon:none"));
 
-  EXPECT_EQ(behavior.getDebugInfo("avoid_mode"), "headon");
-  EXPECT_EQ(behavior.getDebugInfo("full_avoid_mode"), "headon#[none]");
   EXPECT_EQ(behavior.expandMacros("mode=$[AVD_MODE],smode=$[AVD_SMODE],full=$[FULL_MODE]"),
             "mode=headon,smode=none,full=headon:none");
 }

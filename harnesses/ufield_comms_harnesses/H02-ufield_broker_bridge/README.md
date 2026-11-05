@@ -6,7 +6,7 @@ This harness exercises broker-level setup for `uFldNodeBroker` and
 The evaluated surface is node broker ping publication, shore broker ack
 publication, node-count registration, shoreside qbridge expansion, shoreside
 custom bridge expansion, node-side user bridge registration, `NODE_PSHARE_VARS`
-publication, keyword mismatch status propagation, shoreside bridge token
+publication, keyword mismatch rejection, shoreside bridge token
 expansion, mediated node-message bridge selection, vnode shore discovery
 publication, shoreside and node-side auto-bridge suppression, and default
 alias/default vnode-port handling.
@@ -23,11 +23,22 @@ Run one case:
 ./zlaunch.sh --log=full --case=broker_handshake_pass --port_base=4000
 ```
 
-Run the group:
+Run the 11 core cases:
 
 ```sh
-./zlaunch.sh --jobs=2 --port_base=4000
+./zlaunch.sh --core_only --jobs=2 --port_base=4000
 ```
+
+The full 12-case matrix includes `node_mediated_bridge_pass`, which requires
+the separately built `pMediator` app from `moos-ivp-swarm` on PATH. Add that
+repository's `bin/` directory to PATH, then run without `--core_only`.
+A live run selecting that case fails before creating workdirs or starting
+MOOS apps when the dependency is missing. `--just_make` can generate targets
+without the extension. Combining `--core_only` with an explicit mediation
+case is rejected rather than silently omitting the requested case.
+
+Live supplemental log checks also require `ripgrep` (`rg`) on PATH. Missing
+`rg` fails preflight before creating a run; `--just_make` does not require it.
 
 ## Current Matrix
 
@@ -35,7 +46,7 @@ Run the group:
 - `shore_qbridge_expansion_pass` Configures the normal `NODE_REPORT`, `NODE_MESSAGE`, and `ACK_MESSAGE` qbridge set; passes when the exact qbridge summary includes those core and automatic request variables and shoreside logs the expected all/Abe/Ben report, Ben message, and Abe acknowledgement `PSHARE_CMD` expansions.
 - `shore_custom_bridge_pass` Adds `bridge=src=DEPLOY_$V,alias=DEPLOY`; passes when the exact bridge summary contains the template plus `DEPLOY_ABE` and `DEPLOY_BEN`, and shoreside logs both corresponding `src_name=DEPLOY_<V>,dest_name=DEPLOY` commands.
 - `node_custom_bridge_pass` Adds `src=CUSTOM_LOCAL,alias=CUSTOM_SHARED` to both node brokers; passes when the exact node alias summary begins with `CUSTOM_SHARED` and each vehicle log contains its `CUSTOM_LOCAL` to `CUSTOM_SHARED` pShare command.
-- `keyword_mismatch_status_pass` Gives the shore broker keyword `shoreside_only` while the node brokers use their normal handshake; passes when shore and vehicle logs contain `status=keyword_mismatch` acknowledgements for both Abe and Ben, node count still reaches two, and the ordinary bridge and traffic summaries remain valid.
+- `keyword_mismatch_status_pass` Gives the shore broker keyword `shoreside_only` while the node brokers use their normal handshake; passes when the mission observes an incoming broker ping but no broker acknowledgement, no enrolled nodes, and no delivered traffic. The legacy case token is retained; an invalid keyword is a refusal rather than an acknowledgement status.
 - `shore_bridge_tokens_pass` Adds `STATUS_$v -> STATUS` and `INDEX_$N -> INDEXED_STATUS`; passes when the exact bridge summary contains the templates and expansions and shoreside logs commands for `STATUS_abe`, `STATUS_ben`, `INDEX_1`, and `INDEX_2` with their expected aliases.
 - `node_mediated_bridge_pass` Replaces each node broker's `NODE_MESSAGE_LOCAL` bridge with `MEDIATED_MESSAGE_LOCAL` and runs `pMediator`; passes when both vehicle logs contain the mediated command and lack the unmediated command, the exact node alias summary names `MEDIATED_MESSAGE`, and a mediated Abe-to-Ben message is delivered with ordinary reports and acknowledgement.
 - `shore_try_vnode_pass` Configures `try_vnode=route=127.0.0.1:4999`; passes when shoreside logs the exact `TRY_SHORE_HOST` pShare route to that endpoint and the mission summary also contains the ordinary local `TRY_SHORE_HOST=pshare_route=localhost:<vehicle-port>` advertisement.
