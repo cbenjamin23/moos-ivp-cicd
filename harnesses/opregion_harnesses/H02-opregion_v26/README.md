@@ -33,7 +33,9 @@ an overlapping block.
   L-shaped generalized border represented by two convex cover polygons.
 - `lapsed_recovery_pass` temporarily shrinks the active border around a moving
   vehicle without reaching the breach distance, then restores the region and
-  requires recovery evidence plus route completion.
+  requires recovery evidence plus route completion. The initial/restored region
+  leaves both waypoints clear of contained-state avoidance; the temporary shrink
+  still forces a real lapse. Missing arrival fails at 80 seconds after deployment.
 - `entry_gate_start_outside_pass` starts outside the region with entry gating
   enabled and requires the waypoint behavior to carry the vehicle inside
   before containment becomes active.
@@ -57,6 +59,10 @@ export PATH="/path/to/isolated/moos-ivp/bin:/path/to/isolated/moos-ivp/scripts:$
 cd harnesses/opregion_harnesses/H02-opregion_v26
 ./zlaunch.sh --jobs=2 --port_base=22000 --keep_workdirs 10
 ```
+
+The wrapper limit defaults to 120 seconds of database uptime, including startup
+and broker discovery. The recovery evaluator has its own deployment-relative
+deadline. CI uses `--log=full` to retain navigation and helm evidence for failures.
 
 For target-only validation:
 

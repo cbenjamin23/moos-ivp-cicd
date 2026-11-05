@@ -23,7 +23,9 @@ Behavior = BHV_OpRegionV26
   updates   = OPREGION_UPDATES
   dynamic_region_var = OPREGION_CORE_POLY
 
-  core_poly = border={-23,-135:30,-135:30,-107:-23,-107},label=recover_border # poly={-23,-135:30,-135:30,-107:-23,-107},label=recover_cover
+  // Keep the normal route clear of contained-state avoidance. The timed
+  // shrink still forces a real lapse and the get-back objective to run.
+  core_poly = border={-60,-170:60,-170:60,-70:-60,-70},label=recover_border # poly={-60,-170:60,-170:60,-70:-60,-70},label=recover_cover
   lapse_dist  = 2
   breach_dist = 22
   stay_in_enabled = true

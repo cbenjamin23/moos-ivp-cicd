@@ -144,7 +144,7 @@ jobs:
         id: v26
         if: ${{ !cancelled() && steps.required_cpp.outcome == 'success' }}
         working-directory: cicd/harnesses/opregion_harnesses/H02-opregion_v26
-        run: ./zlaunch.sh --jobs=2 --port_base=22000 --keep_workdirs 10
+        run: ./zlaunch.sh --jobs=2 --port_base=22000 --log=full --keep_workdirs 10
 
       - name: V24 compatibility contracts
         id: v24
